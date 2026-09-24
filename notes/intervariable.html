@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inter Variable Font Example</title>
+  <style>
+    /* 1. Define the Inter Variable Font Face */
+    @font-face {
+      font-family: 'Inter Variable';
+      src: url('InterVariable.woff2') format('woff2 supports variations'),
+           url('InterVariable.woff2') format('woff2-variations');
+      font-weight: 100 900;       /* Inter supports 100 (Thin) to 900 (Black) */
+      font-style: normal italic;  /* Inter includes an oblique/italic slant axis */
+      font-display: swap;
+    }
+
+    /* 2. Setup global styles and system fallbacks */
+    :root {
+      /* Use Inter Variable with clean system fallbacks */
+      --font-stack: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-stack);
+      line-height: 1.5;
+      color: #111827;
+      background-color: #f9fafb;
+      padding: 2rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* 3. Leverage arbitrary variable weights */
+    h1 {
+      font-size: 2.5rem;
+      letter-spacing: -0.02em;
+      /* Inter looks exceptionally crisp at heavy, non-standard weights */
+      font-weight: 850; 
+      margin-bottom: 0.5rem;
+    }
+
+    p.subtitle {
+      font-size: 1.25rem;
+      color: #4b5563;
+      /* Light but highly readable weight */
+      font-weight: 350; 
+      margin-top: 0;
+    }
+
+    p.body-text {
+      /* Standard body weight */
+      font-weight: 400; 
+    }
+
+    /* 4. Utilizing the internal Slant (slnt) Axis */
+    em, i, .italic-text {
+      font-style: italic;
+      /* 
+        For Inter Variable, browsers map "font-style: italic" to its slant axis automatically. 
+        If you want to manually fine-tune the exact angle, use font-variation-settings:
+        font-variation-settings: 'slnt' -10; 
+      */
+    }
+
+    .bold-accent {
+      font-weight: 650; /* Perfect semi-bold intermediate weight */
+      color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Deep Work</h1>
+  <p class="subtitle">Rules for focused success in a distracted world.</p>
+  
+  <p class="body-text">
+    By leveraging <span class="bold-accent">Inter Variable</span>, we load only a single 
+    font file instead of individual files for regular, medium, bold, and italic styles. 
+    This results in a <em>significantly faster</em> page load time while granting us 
+    access to every numeric weight between 100 and 900.
+  </p>
+
+</body>
+</html>
+
