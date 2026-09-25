@@ -66,3 +66,9 @@ button.primary {
   color: white;
   border-radius: 8px;
 }
+
+.brand-logo {
+  display: block;
+  height: auto;
+  width: 180px;
+}

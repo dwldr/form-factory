@@ -1,18 +1,11 @@
-# Dependencies
 /node_modules/
-
-# Angular build cache
 /.angular/
-
-# Build output
 /dist/
-
-# Local environment files
+/notes/
 .env
 .env.local
-
-# Editor and OS files
-.vscode/
-.idea/
+.vscode
+.idea
 .DS_Store
 Thumbs.db
+
