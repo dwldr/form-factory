@@ -1,0 +1,1299 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="description"
+    content="Create beautiful forms with advanced logic. Build event registrations, applications, surveys, and invite-only forms with Form Factory."
+  >
+
+  <meta name="theme-color" content="#ffffff">
+
+  <title>Form Factory — Forms Without Limits</title>
+
+  <!--
+    Tailwind browser build is for development and prototyping.
+    Replace with a compiled stylesheet for production.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c2225;
+      --yellow: #ffdf00;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 6rem;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    :focus-visible {
+      outline: 3px solid #a56a00;
+      outline-offset: 4px;
+    }
+
+    a,
+    button,
+    summary {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .icon {
+      display: inline-block;
+      width: 1.25rem;
+      height: 1.25rem;
+      flex-shrink: 0;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 3rem;
+      align-items: center;
+      justify-content: center;
+      gap: .65rem;
+      padding: .75rem 1.5rem;
+      border: 1px solid transparent;
+      border-radius: .6rem;
+      font-size: .875rem;
+      font-weight: 700;
+      line-height: 1.4;
+      text-decoration: none;
+      transition:
+        background-color .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+    }
+
+    .button-dark {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .button-dark:hover {
+      background: #394247;
+    }
+
+    .button-outline {
+      border-color: #777f83;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .button-outline:hover {
+      background: #f3f4f6;
+    }
+
+    .button-yellow {
+      background: var(--yellow);
+      color: #171b1e;
+    }
+
+    .button-yellow:hover {
+      background: #f0d000;
+    }
+
+    .hero-glow {
+      background:
+        radial-gradient(
+          ellipse at 76% 42%,
+          rgba(234, 234, 234, .65),
+          transparent 55%
+        ),
+        #fff;
+    }
+
+    /*
+      Decorative product illustration.
+      Its contents are not interactive.
+    */
+
+    .builder-window {
+      transform: rotate(3deg);
+      transform-origin: center;
+      box-shadow: 0 35px 90px rgba(0, 0, 0, .12);
+    }
+
+    .builder-field {
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .025);
+    }
+
+    .builder-field + .builder-field {
+      margin-top: .65rem;
+    }
+
+    .builder-sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      min-height: 2.25rem;
+      padding: .4rem .65rem;
+      border-radius: .4rem;
+      font-size: .7rem;
+      color: #343c40;
+    }
+
+    .builder-sidebar-item .icon {
+      width: .95rem;
+      height: .95rem;
+    }
+
+    .builder-sidebar-item.active {
+      background: #e4efff;
+      color: #164da3;
+      font-weight: 700;
+    }
+
+    .sticky-note {
+      box-shadow: 6px 12px 22px rgba(0, 0, 0, .3);
+    }
+
+    .note-white {
+      transform: rotate(-15deg);
+    }
+
+    .note-yellow {
+      transform: rotate(12deg);
+    }
+
+    .dark-pattern {
+      background:
+        radial-gradient(
+          ellipse at 55% 25%,
+          #303739 0%,
+          #1c2225 65%
+        );
+    }
+
+    @media (max-width: 1023px) {
+      .builder-window {
+        transform: rotate(1deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+
+      .button:hover {
+        transform: none;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-w-80 antialiased">
+
+  <!-- Reusable SVG icons -->
+
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    class="absolute h-0 w-0 overflow-hidden"
+    aria-hidden="true"
+  >
+    <symbol id="icon-check" viewBox="0 0 24 24">
+      <path d="m5 12 4 4L19 6"/>
+    </symbol>
+
+    <symbol id="icon-arrow-right" viewBox="0 0 24 24">
+      <path d="M5 12h14m-6-6 6 6-6 6"/>
+    </symbol>
+
+    <symbol id="icon-arrow-up-right" viewBox="0 0 24 24">
+      <path d="M7 17 17 7M7 7h10v10"/>
+    </symbol>
+
+    <symbol id="icon-play" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="m10 8 6 4-6 4z"/>
+    </symbol>
+
+    <symbol id="icon-calendar" viewBox="0 0 24 24">
+      <rect x="3" y="5" width="18" height="16" rx="2"/>
+      <path d="M7 3v4M17 3v4M3 10h18"/>
+    </symbol>
+
+    <symbol id="icon-file" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <path d="M14 2v6h6M8 13h8M8 17h6"/>
+    </symbol>
+
+    <symbol id="icon-chart" viewBox="0 0 24 24">
+      <rect x="3" y="13" width="4" height="8" rx="1"/>
+      <rect x="10" y="8" width="4" height="13" rx="1"/>
+      <rect x="17" y="3" width="4" height="18" rx="1"/>
+    </symbol>
+
+    <symbol id="icon-users" viewBox="0 0 24 24">
+      <circle cx="8" cy="8" r="3"/>
+      <circle cx="17" cy="8" r="3"/>
+      <path d="M2 20v-2a6 6 0 0 1 12 0v2zM15 14a6 6 0 0 1 7 6"/>
+    </symbol>
+
+    <symbol id="icon-settings" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+    </symbol>
+
+    <symbol id="icon-logic" viewBox="0 0 24 24">
+      <rect x="2" y="3" width="7" height="7" rx="1"/>
+      <rect x="15" y="3" width="7" height="7" rx="1"/>
+      <rect x="8.5" y="16" width="7" height="6" rx="1"/>
+      <path d="M5.5 10v3h12V10M12 13v3"/>
+    </symbol>
+
+    <symbol id="icon-edit" viewBox="0 0 24 24">
+      <path d="M12 20h9"/>
+      <path d="m16 4 4 4-11 11-5 1 1-5z"/>
+    </symbol>
+
+    <symbol id="icon-mail" viewBox="0 0 24 24">
+      <rect x="2" y="4" width="20" height="16" rx="2"/>
+      <path d="m3 6 9 7 9-7"/>
+    </symbol>
+
+    <symbol id="icon-lock" viewBox="0 0 24 24">
+      <rect x="4" y="10" width="16" height="12" rx="2"/>
+      <path d="M8 10V7a4 4 0 0 1 8 0v3"/>
+    </symbol>
+
+    <symbol id="icon-menu" viewBox="0 0 24 24">
+      <path d="M4 7h16M4 12h16M4 17h16"/>
+    </symbol>
+
+    <symbol id="icon-close" viewBox="0 0 24 24">
+      <path d="M5 5 19 19M19 5 5 19"/>
+    </symbol>
+  </svg>
+
+  <!-- Skip navigation -->
+
+  <a
+    href="#main"
+    class="sr-only fixed top-4 left-4 z-100 rounded-lg bg-yellow-300 px-5 py-3 font-bold text-gray-950 focus:not-sr-only"
+  >
+    Skip to main content
+  </a>
+
+  <!-- Header -->
+
+  <header class="relative z-50 bg-white">
+    <div
+      class="mx-auto flex h-22 max-w-7xl items-center justify-between gap-8 px-6 lg:px-12"
+    >
+
+      <!-- Logo -->
+
+      <a
+        href="#top"
+        class="inline-flex shrink-0 items-center gap-2 rounded-sm"
+        aria-label="Form Factory, home"
+      >
+        <svg
+          viewBox="0 0 56 52"
+          class="h-11 w-11"
+          aria-hidden="true"
+        >
+          <path
+            fill="#1c2225"
+            d="M7 22h42v25H7zM12 20V10h7V5h8v5h7v10z"
+          />
+          <path
+            fill="#1c2225"
+            d="M5 22 49 9v12L5 34z"
+          />
+          <path
+            fill="#ffdf00"
+            d="M13 38h6v7h-6zm12 0h6v7h-6zm12 0h6v7h-6z"
+          />
+        </svg>
+
+        <span
+          class="flex flex-col font-black leading-none tracking-tight text-gray-950"
+          aria-hidden="true"
+        >
+          <span class="text-2xl">FORM</span>
+          <span class="text-[.65rem] tracking-[.35em]">
+            FACTORY
+          </span>
+        </span>
+      </a>
+
+      <!-- Desktop navigation -->
+
+      <nav
+        class="hidden items-center gap-9 lg:flex"
+        aria-label="Main navigation"
+      >
+        <a
+          href="#product"
+          class="rounded-sm text-sm font-medium hover:underline hover:underline-offset-4"
+        >
+          Product
+        </a>
+
+        <a
+          href="#use-cases"
+          class="rounded-sm text-sm font-medium hover:underline hover:underline-offset-4"
+        >
+          Use Cases
+        </a>
+
+        <a
+          href="#pricing"
+          class="rounded-sm text-sm font-medium hover:underline hover:underline-offset-4"
+        >
+          Pricing
+        </a>
+
+        <a
+          href="#resources"
+          class="rounded-sm text-sm font-medium hover:underline hover:underline-offset-4"
+        >
+          Resources
+        </a>
+      </nav>
+
+      <div class="hidden items-center gap-8 lg:flex">
+        <a
+          href="#contact"
+          class="rounded-sm text-sm font-medium hover:underline hover:underline-offset-4"
+        >
+          Sign In
+        </a>
+
+        <a href="#contact" class="button button-dark">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Accessible mobile navigation -->
+
+      <details class="group relative lg:hidden">
+        <summary
+          class="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-lg border border-gray-300 [&::-webkit-details-marker]:hidden"
+          aria-label="Toggle navigation menu"
+        >
+          <svg class="icon group-open:hidden" aria-hidden="true">
+            <use href="#icon-menu"/>
+          </svg>
+
+          <svg class="icon hidden group-open:block" aria-hidden="true">
+            <use href="#icon-close"/>
+          </svg>
+        </summary>
+
+        <nav
+          aria-label="Mobile navigation"
+          class="absolute top-14 right-0 z-50 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-xl"
+        >
+          <ul class="space-y-1 text-sm font-medium">
+            <li>
+              <a
+                href="#product"
+                class="block rounded-lg px-4 py-3 hover:bg-gray-100"
+              >
+                Product
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="#use-cases"
+                class="block rounded-lg px-4 py-3 hover:bg-gray-100"
+              >
+                Use Cases
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="#pricing"
+                class="block rounded-lg px-4 py-3 hover:bg-gray-100"
+              >
+                Pricing
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="#resources"
+                class="block rounded-lg px-4 py-3 hover:bg-gray-100"
+              >
+                Resources
+              </a>
+            </li>
+
+            <li class="border-t border-gray-200 pt-2">
+              <a
+                href="#contact"
+                class="block rounded-lg px-4 py-3 hover:bg-gray-100"
+              >
+                Sign In
+              </a>
+            </li>
+
+            <li>
+              <a
+                href="#contact"
+                class="block rounded-lg bg-gray-950 px-4 py-3 text-center text-white"
+              >
+                Get Started
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+
+    <!-- Hero -->
+
+    <section
+      id="top"
+      aria-labelledby="hero-title"
+      class="hero-glow overflow-hidden"
+    >
+      <div
+        class="mx-auto grid max-w-7xl items-center gap-12 px-6 pt-14 pb-20 lg:min-h-160 lg:grid-cols-[.85fr_1.15fr] lg:gap-6 lg:px-12 lg:pt-12"
+      >
+
+        <!-- Hero content -->
+
+        <div class="relative z-10 max-w-xl">
+
+          <p
+            class="mb-5 text-xs font-semibold tracking-[.35em] text-gray-600 uppercase"
+          >
+            Forms Without Limits
+          </p>
+
+          <h1
+            id="hero-title"
+            class="max-w-lg text-[clamp(3.25rem,5.5vw,5.5rem)] leading-[1.03] font-bold tracking-[-.05em]"
+          >
+            Built for every kind of question.
+          </h1>
+
+          <p
+            class="mt-7 max-w-md text-lg leading-relaxed text-gray-700"
+          >
+            Form Factory gives you the power to create beautiful
+            forms with advanced logic, then publish them to the
+            world or a select list of invitees.
+          </p>
+
+          <div class="mt-9 flex flex-wrap items-center gap-4">
+            <a href="#contact" class="button button-dark">
+              Get Started Free
+              <svg class="icon" aria-hidden="true">
+                <use href="#icon-arrow-right"/>
+              </svg>
+            </a>
+
+            <a href="#product" class="button button-outline">
+              <svg class="icon" aria-hidden="true">
+                <use href="#icon-play"/>
+              </svg>
+              Explore Product
+            </a>
+          </div>
+
+          <ul
+            class="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm text-gray-700"
+            aria-label="Product benefits"
+          >
+            <li class="flex items-center gap-2">
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-check"/>
+              </svg>
+              No credit card required
+            </li>
+
+            <li class="flex items-center gap-2">
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-check"/>
+              </svg>
+              Set up in minutes
+            </li>
+
+            <li class="flex items-center gap-2">
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-check"/>
+              </svg>
+              Powerful logic
+            </li>
+          </ul>
+        </div>
+
+        <!-- Product illustration -->
+
+        <div
+          id="product"
+          class="relative mx-auto w-full max-w-165 py-6 lg:py-10"
+        >
+          <div
+            class="builder-window overflow-hidden rounded-2xl border border-gray-200 bg-white"
+            role="img"
+            aria-label="Illustration of the Form Factory form builder showing an event registration form, editable questions, form logic, and available field types."
+          >
+
+            <!-- Window toolbar -->
+
+            <div
+              class="flex h-9 items-center gap-1.5 border-b border-gray-200 bg-gray-100 px-4"
+              aria-hidden="true"
+            >
+              <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-yellow-400"></span>
+              <span class="h-2.5 w-2.5 rounded-full bg-green-600"></span>
+            </div>
+
+            <div class="grid min-h-100 grid-cols-[68px_1fr] sm:grid-cols-[105px_1fr]">
+
+              <!-- Builder left sidebar -->
+
+              <div
+                class="border-r border-gray-200 bg-gray-50 p-2 sm:p-3"
+                aria-hidden="true"
+              >
+                <div
+                  class="mb-5 flex h-9 items-center justify-center border-b border-gray-200 text-xs font-black"
+                >
+                  FF.
+                </div>
+
+                <div class="space-y-1">
+                  <div class="builder-sidebar-item active">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#icon-edit"/>
+                    </svg>
+                    <span class="hidden sm:inline">Build</span>
+                  </div>
+
+                  <div class="builder-sidebar-item">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#icon-logic"/>
+                    </svg>
+                    <span class="hidden sm:inline">Logic</span>
+                  </div>
+
+                  <div class="builder-sidebar-item">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#icon-settings"/>
+                    </svg>
+                    <span class="hidden sm:inline">Design</span>
+                  </div>
+
+                  <div class="builder-sidebar-item">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#icon-settings"/>
+                    </svg>
+                    <span class="hidden sm:inline">Settings</span>
+                  </div>
+
+                  <div class="builder-sidebar-item">
+                    <svg class="icon" aria-hidden="true">
+                      <use href="#icon-chart"/>
+                    </svg>
+                    <span class="hidden sm:inline">Responses</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Builder main area -->
+
+              <div class="min-w-0">
+
+                <div
+                  class="flex min-h-14 items-center justify-between gap-2 border-b border-gray-200 px-3 sm:px-5"
+                  aria-hidden="true"
+                >
+                  <span class="text-xs font-bold sm:text-sm">
+                    Event Registration
+                  </span>
+
+                  <span
+                    class="rounded-md bg-gray-950 px-3 py-2 text-[10px] font-bold text-white"
+                  >
+                    Publish
+                  </span>
+                </div>
+
+                <div
+                  class="grid grid-cols-1 sm:grid-cols-[1fr_145px]"
+                  aria-hidden="true"
+                >
+
+                  <!-- Fields -->
+
+                  <div class="min-w-0 p-3 sm:p-4">
+
+                    <div
+                      class="mb-4 flex gap-5 border-b border-gray-200 text-[11px]"
+                    >
+                      <span
+                        class="border-b-2 border-yellow-400 px-2 pb-2 font-bold"
+                      >
+                        Form
+                      </span>
+
+                      <span class="px-2 pb-2 text-gray-600">
+                        Logic
+                      </span>
+
+                      <span class="px-2 pb-2 text-gray-600">
+                        Settings
+                      </span>
+                    </div>
+
+                    <div class="space-y-3">
+
+                      <div
+                        class="builder-field rounded-lg border border-gray-200 bg-gray-50 p-3"
+                      >
+                        <div class="flex gap-2">
+                          <span class="text-gray-500">⠿</span>
+
+                          <div class="min-w-0">
+                            <p class="text-[11px] font-medium">
+                              Full Name
+                            </p>
+
+                            <p class="mt-1 text-[10px] text-gray-600">
+                              Short answer
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        class="builder-field rounded-lg border border-gray-200 bg-gray-50 p-3"
+                      >
+                        <div class="flex gap-2">
+                          <span class="text-gray-500">⠿</span>
+
+                          <div class="min-w-0">
+                            <p class="text-[11px] font-medium">
+                              Email Address
+                            </p>
+
+                            <p class="mt-1 text-[10px] text-gray-600">
+                              Email
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        class="builder-field rounded-lg border border-gray-200 bg-gray-50 p-3"
+                      >
+                        <div class="flex gap-2">
+                          <span class="text-gray-500">⠿</span>
+
+                          <div class="min-w-0">
+                            <p class="text-[11px] font-medium">
+                              Which sessions are you interested in?
+                            </p>
+
+                            <p class="mt-1 text-[10px] text-gray-600">
+                              Multiple choice
+                            </p>
+
+                            <div
+                              class="mt-3 space-y-2 text-[10px]"
+                            >
+                              <div class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-sm border border-gray-500"></span>
+                                Design
+                              </div>
+
+                              <div class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-sm border border-gray-500"></span>
+                                Development
+                              </div>
+
+                              <div class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-sm border border-gray-500"></span>
+                                Product
+                              </div>
+
+                              <div class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-sm border border-gray-500"></span>
+                                Other
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        class="builder-field rounded-lg border border-gray-200 bg-gray-50 p-3"
+                      >
+                        <div class="flex gap-2">
+                          <span class="text-gray-500">⠿</span>
+
+                          <div>
+                            <p class="text-[11px] font-medium">
+                              Dietary Restrictions
+                            </p>
+
+                            <p class="mt-1 text-[10px] text-gray-600">
+                              Short answer
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <!-- Field type palette -->
+
+                  <div
+                    class="hidden border-l border-gray-200 p-3 sm:block"
+                  >
+                    <p
+                      class="mb-4 border-b border-gray-200 pb-3 text-[11px] font-bold"
+                    >
+                      Add Field
+                    </p>
+
+                    <ul class="space-y-4 text-[10px]">
+                      <li>Short Answer</li>
+                      <li>Long Answer</li>
+                      <li>Multiple Choice</li>
+                      <li>Checkboxes</li>
+                      <li>Dropdown</li>
+                      <li>File Upload</li>
+                      <li>Date</li>
+                      <li>Email</li>
+                      <li>Number</li>
+                      <li>Rating</li>
+                      <li>Paragraph</li>
+                      <li>Section</li>
+                    </ul>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p
+            class="mt-7 text-right text-sm font-medium italic text-gray-700 lg:pr-5"
+          >
+            Complex logic. Simple to build.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use cases -->
+
+    <section
+      id="use-cases"
+      aria-labelledby="use-cases-title"
+      class="dark-pattern relative overflow-hidden bg-gray-950 py-16 text-white lg:py-20"
+    >
+      <!-- Decorative shapes -->
+
+      <div
+        class="pointer-events-none absolute top-10 right-[-3rem] h-48 w-48 rounded-full border border-white/10"
+        aria-hidden="true"
+      ></div>
+
+      <div
+        class="pointer-events-none absolute top-20 right-8 h-36 w-24 rounded-t-full border border-yellow-400"
+        aria-hidden="true"
+      ></div>
+
+      <div class="relative mx-auto max-w-7xl px-6 lg:px-12">
+
+        <div class="mb-10">
+          <p
+            class="mb-4 text-xs font-semibold tracking-[.3em] text-gray-300 uppercase"
+          >
+            Use Cases
+          </p>
+
+          <h2
+            id="use-cases-title"
+            class="max-w-5xl text-[clamp(2.5rem,5vw,4rem)] leading-tight font-bold tracking-[-.04em]"
+          >
+            Built for every kind of question.
+          </h2>
+
+          <p class="mt-4 max-w-2xl text-lg text-gray-200">
+            Flexible enough for any use case. Powerful enough for
+            complex logic.
+          </p>
+        </div>
+
+        <div
+          class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        >
+
+          <!-- Event registration -->
+
+          <article
+            class="flex min-h-72 flex-col rounded-xl bg-white p-6 text-gray-950"
+          >
+            <div
+              class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-700"
+            >
+              <svg class="icon h-8 w-8" aria-hidden="true">
+                <use href="#icon-calendar"/>
+              </svg>
+            </div>
+
+            <h3 class="text-xl font-bold tracking-tight">
+              Event Registration
+            </h3>
+
+            <p class="mt-3 leading-relaxed text-gray-700">
+              Manage attendees and collect the right information
+              with conditional logic.
+            </p>
+
+            <a
+              href="#contact"
+              class="mt-auto inline-flex min-h-11 items-center gap-2 self-start pt-5 text-sm font-bold underline underline-offset-4 hover:no-underline"
+              aria-label="Get started with event registration forms"
+            >
+              Get started
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-arrow-right"/>
+              </svg>
+            </a>
+          </article>
+
+          <!-- Applications -->
+
+          <article
+            class="flex min-h-72 flex-col rounded-xl border border-white/20 bg-white/3 p-6"
+          >
+            <div
+              class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-200/15 text-emerald-300"
+            >
+              <svg class="icon h-8 w-8" aria-hidden="true">
+                <use href="#icon-file"/>
+              </svg>
+            </div>
+
+            <h3 class="text-xl font-bold tracking-tight">
+              Applications
+            </h3>
+
+            <p class="mt-3 leading-relaxed text-gray-200">
+              Build multi-step applications with dynamic
+              requirements and review responses with ease.
+            </p>
+
+            <a
+              href="#contact"
+              class="mt-auto inline-flex min-h-11 items-center gap-2 self-start pt-5 text-sm font-bold underline underline-offset-4 hover:no-underline"
+              aria-label="Get started with application forms"
+            >
+              Get started
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-arrow-right"/>
+              </svg>
+            </a>
+          </article>
+
+          <!-- Surveys -->
+
+          <article
+            class="flex min-h-72 flex-col rounded-xl bg-white p-6 text-gray-950"
+          >
+            <div
+              class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-violet-700"
+            >
+              <svg class="icon h-8 w-8" aria-hidden="true">
+                <use href="#icon-chart"/>
+              </svg>
+            </div>
+
+            <h3 class="text-xl font-bold tracking-tight">
+              Surveys
+            </h3>
+
+            <p class="mt-3 leading-relaxed text-gray-700">
+              Ask smarter questions and get better insights
+              with flexible question types.
+            </p>
+
+            <a
+              href="#contact"
+              class="mt-auto inline-flex min-h-11 items-center gap-2 self-start pt-5 text-sm font-bold underline underline-offset-4 hover:no-underline"
+              aria-label="Get started with surveys"
+            >
+              Get started
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-arrow-right"/>
+              </svg>
+            </a>
+          </article>
+
+          <!-- Invite-only forms -->
+
+          <article
+            class="flex min-h-72 flex-col rounded-xl border border-white/20 bg-white/3 p-6"
+          >
+            <div
+              class="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-orange-200/15 text-orange-300"
+            >
+              <svg class="icon h-8 w-8" aria-hidden="true">
+                <use href="#icon-users"/>
+              </svg>
+            </div>
+
+            <h3 class="text-xl font-bold tracking-tight">
+              Invite-Only Forms
+            </h3>
+
+            <p class="mt-3 leading-relaxed text-gray-200">
+              Share with a curated list of invitees or keep
+              forms private to your organization.
+            </p>
+
+            <a
+              href="#contact"
+              class="mt-auto inline-flex min-h-11 items-center gap-2 self-start pt-5 text-sm font-bold underline underline-offset-4 hover:no-underline"
+              aria-label="Get started with invite-only forms"
+            >
+              Get started
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-arrow-right"/>
+              </svg>
+            </a>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Outcomes -->
+
+    <section
+      id="resources"
+      aria-labelledby="outcomes-title"
+      class="grid lg:grid-cols-2"
+    >
+
+      <!-- Content -->
+
+      <div
+        class="flex min-h-112 flex-col justify-center px-6 py-16 sm:px-12 lg:px-[max(3rem,calc((100vw-80rem)/2))]"
+      >
+        <div class="max-w-lg">
+
+          <p
+            class="mb-5 text-xs font-semibold tracking-[.3em] text-gray-600 uppercase"
+          >
+            From Ideas to Impact
+          </p>
+
+          <h2
+            id="outcomes-title"
+            class="text-[clamp(2.5rem,4vw,3.75rem)] leading-tight font-bold tracking-[-.045em]"
+          >
+            More than forms.<br>
+            Brighter outcomes.
+          </h2>
+
+          <p class="mt-5 text-base leading-relaxed text-gray-700">
+            Whether you're planning an event, collecting
+            applications, or running a survey, Form Factory gives
+            you the tools to collect the right information and
+            put it to work.
+          </p>
+
+          <div class="mt-7 flex flex-wrap items-center gap-5">
+            <a href="#contact" class="button button-dark">
+              Get Started Free
+            </a>
+
+            <a
+              href="#templates"
+              class="inline-flex min-h-11 items-center gap-2 text-sm font-bold underline underline-offset-4 hover:no-underline"
+            >
+              See Templates
+
+              <svg class="icon h-4 w-4" aria-hidden="true">
+                <use href="#icon-arrow-right"/>
+              </svg>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Decorative note illustration -->
+
+      <div
+        class="relative flex min-h-112 items-center justify-center overflow-hidden bg-[#242424] px-8 py-20"
+        role="img"
+        aria-label="Two overlapping notes. The first reads Ideas, Applications, People, Progress. The second reads Better questions. A brighter tomorrow."
+      >
+
+        <div
+          class="pointer-events-none absolute inset-0 opacity-20"
+          aria-hidden="true"
+          style="
+            background:
+              linear-gradient(120deg,transparent 25%,#000 25%,#000 45%,transparent 45%),
+              linear-gradient(25deg,#444,transparent 65%);
+          "
+        ></div>
+
+        <div
+          class="sticky-note note-white relative z-10 -mr-8 flex h-64 w-52 flex-col justify-between bg-[#f4f1eb] p-7 text-gray-950 sm:h-72 sm:w-60"
+          aria-hidden="true"
+        >
+          <p class="text-xl leading-snug font-medium tracking-tight">
+            Ideas<br>
+            Applications<br>
+            People<br>
+            Progress
+          </p>
+
+          <svg viewBox="0 0 56 52" class="h-10 w-10">
+            <path
+              fill="#1c2225"
+              d="M7 22h42v25H7zM12 20V10h7V5h8v5h7v10z"
+            />
+            <path
+              fill="#1c2225"
+              d="M5 22 49 9v12L5 34z"
+            />
+            <path
+              fill="#ffdf00"
+              d="M13 38h6v7h-6zm12 0h6v7h-6zm12 0h6v7h-6z"
+            />
+          </svg>
+        </div>
+
+        <div
+          class="sticky-note note-yellow relative z-0 -mt-14 flex h-64 w-52 items-center justify-center bg-[#ffe08a] p-8 text-gray-950 sm:h-72 sm:w-60"
+          aria-hidden="true"
+        >
+          <p class="text-xl leading-snug font-medium italic">
+            Better<br>
+            questions.<br>
+            A brighter<br>
+            tomorrow.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Supporting sections / destinations -->
+
+    <section
+      id="templates"
+      aria-labelledby="templates-title"
+      class="bg-gray-100 px-6 py-16 lg:px-12"
+    >
+      <div class="mx-auto max-w-7xl">
+        <p
+          class="mb-3 text-xs font-semibold tracking-[.3em] text-gray-600 uppercase"
+        >
+          Templates
+        </p>
+
+        <h2
+          id="templates-title"
+          class="text-3xl font-bold tracking-tight sm:text-4xl"
+        >
+          Start with a template. Make it your own.
+        </h2>
+
+        <p class="mt-4 max-w-2xl leading-relaxed text-gray-700">
+          Build registration forms, applications, surveys, and
+          more with a flexible starting point.
+        </p>
+
+        <a
+          href="#contact"
+          class="mt-7 inline-flex min-h-11 items-center gap-2 font-bold underline underline-offset-4 hover:no-underline"
+        >
+          Explore Form Factory
+
+          <svg class="icon" aria-hidden="true">
+            <use href="#icon-arrow-right"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Pricing destination -->
+
+    <section
+      id="pricing"
+      aria-labelledby="pricing-title"
+      class="px-6 py-16 lg:px-12"
+    >
+      <div class="mx-auto max-w-7xl">
+        <p
+          class="mb-3 text-xs font-semibold tracking-[.3em] text-gray-600 uppercase"
+        >
+          Pricing
+        </p>
+
+        <h2
+          id="pricing-title"
+          class="text-3xl font-bold tracking-tight sm:text-4xl"
+        >
+          Build without limits.
+        </h2>
+
+        <p class="mt-4 max-w-2xl leading-relaxed text-gray-700">
+          Explore a flexible approach to creating and publishing
+          forms for your next project.
+        </p>
+
+        <a
+          href="#contact"
+          class="button button-dark mt-7"
+        >
+          Get Started
+        </a>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+
+    <section
+      id="contact"
+      aria-labelledby="cta-title"
+      class="bg-yellow-300 px-6 py-16 text-gray-950 lg:px-12 lg:py-20"
+    >
+      <div
+        class="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-center"
+      >
+        <div>
+          <h2
+            id="cta-title"
+            class="text-3xl font-bold tracking-tight sm:text-4xl"
+          >
+            Your next great form starts here.
+          </h2>
+
+          <p class="mt-3 max-w-xl text-base leading-relaxed">
+            Build forms that work the way you do.
+          </p>
+        </div>
+
+        <!-- Replace with the actual registration URL. -->
+
+        <a
+          href="mailto:hello@example.com?subject=Form%20Factory"
+          class="button button-dark shrink-0"
+        >
+          Get Started Free
+
+          <svg class="icon" aria-hidden="true">
+            <use href="#icon-arrow-up-right"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+
+  <footer class="bg-[#1c2225] px-6 py-10 text-white lg:px-12">
+    <div
+      class="mx-auto flex max-w-7xl flex-col justify-between gap-8 md:flex-row md:items-center"
+    >
+      <div>
+        <a
+          href="#top"
+          class="inline-block text-lg font-black tracking-tight"
+        >
+          FORM FACTORY
+        </a>
+
+        <p class="mt-2 text-sm text-gray-300">
+          Forms without limits.
+        </p>
+      </div>
+
+      <nav aria-label="Footer navigation">
+        <ul class="flex flex-wrap gap-x-6 gap-y-3 text-sm">
+          <li>
+            <a
+              href="#product"
+              class="underline-offset-4 hover:underline"
+            >
+              Product
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="#use-cases"
+              class="underline-offset-4 hover:underline"
+            >
+              Use Cases
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="#pricing"
+              class="underline-offset-4 hover:underline"
+            >
+              Pricing
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="#resources"
+              class="underline-offset-4 hover:underline"
+            >
+              Resources
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <p class="text-sm text-gray-300">
+        &copy; 2026 Form Factory.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
+
