@@ -5,7 +5,9 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "watch": "ng build --watch --configuration development"
+    "watch": "ng build --watch --configuration development",
+    "format": "prettier --write \"src/app/*.ts\" src/styles.css src/main.ts",
+    "format:check": "prettier --check \"src/app/*.ts\" src/styles.css src/main.ts"
   },
   "private": true,
   "dependencies": {
@@ -25,7 +27,9 @@
     "@angular/compiler-cli": "^22.2.0-next",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/node": "^16.11.35",
+    "axe-core": "^4.13.0",
     "postcss": "^8.5.3",
+    "prettier": "^3.9.9",
     "tailwindcss": "^4.1.12",
     "typescript": "~6.0.3"
   }
