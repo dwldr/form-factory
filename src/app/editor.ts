@@ -8,8 +8,9 @@ import {
 } from "@angular/core";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { Store, Field, FieldType, newField } from "./store";
+import { Icon } from "./icon";
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, Icon],
   template: `
     @if (form(); as f) {
       <h1 class="sr-only">Edit {{ f.name }}</h1>
@@ -205,13 +206,16 @@ import { Store, Field, FieldType, newField } from "./store";
             <p class="helper">Changes save automatically in this browser.</p>
           } @else {
             <h2>Add field</h2>
-            <label class="sr-only" for="field-search">Search field types</label
-            ><input
-              id="field-search"
-              placeholder="Search fields…"
-              [value]="fieldQuery()"
-              (input)="fieldQuery.set(value($event))"
-            />
+            <label class="sr-only" for="field-search">Search field types</label>
+            <div class="search field-search">
+              <ff-icon name="search" />
+              <input
+                id="field-search"
+                placeholder="Search fields…"
+                [value]="fieldQuery()"
+                (input)="fieldQuery.set(value($event))"
+              />
+            </div>
 
             <div class="field-types">
               @for (type of filteredTypes(); track type; let i = $index) {

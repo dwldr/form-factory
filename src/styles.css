@@ -288,9 +288,17 @@ nav a:hover {
 .search input {
   border: 0 !important;
   width: 100%;
-  outline-offset: 0;
+  margin: 0 !important;
+  outline: none;
   background: transparent !important;
   padding: 10px 0 !important;
+}
+.search:focus-within {
+  outline: 3px solid #3984db;
+  outline-offset: 2px;
+}
+.field-search {
+  width: 100%;
 }
 .search span {
   font-size: 22px;
