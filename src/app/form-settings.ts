@@ -1,4 +1,4 @@
-import { Component, input, output } from "@angular/core";
+import { Component, input, output, signal } from "@angular/core";
 import { Field, FieldCondition } from "./store";
 import { Icon } from "./icon";
 
@@ -6,6 +6,29 @@ import { Icon } from "./icon";
   selector: "ff-form-settings",
   imports: [Icon],
   template: `
+    <section class="banner-settings" aria-label="Form banner">
+      <h3>Banner image</h3>
+      <p class="helper">Optional PNG, JPEG, or WebP image, up to 1 MB.</p>
+      @if (bannerImage()) {
+        <img
+          class="banner-thumbnail"
+          [src]="bannerImage()"
+          alt="Current form banner"
+        />
+        <button class="danger delete-action" (click)="deleteBanner()">
+          <ff-icon name="trash" />Delete image
+        </button>
+      }
+      <label
+        >Upload banner image<input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="uploadBanner($event)"
+      /></label>
+      @if (imageError()) {
+        <p class="error" role="alert">{{ imageError() }}</p>
+      }
+    </section>
     <p class="helper">
       Control when questions appear and when an answer is required. Changes save
       automatically.
@@ -110,6 +133,51 @@ import { Icon } from "./icon";
   `,
 })
 export class FormSettings {
+  bannerImage = input<string>();
+  bannerImageChange = output<string | undefined>();
+  imageError = signal("");
+  private uploadVersion = 0;
+  async uploadBanner(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    const version = ++this.uploadVersion;
+    this.imageError.set("");
+    if (
+      !["image/png", "image/jpeg", "image/webp"].includes(file.type) ||
+      file.size > 1024 * 1024
+    ) {
+      this.imageError.set(
+        "Choose a PNG, JPEG, or WebP image no larger than 1 MB.",
+      );
+      return;
+    }
+    try {
+      const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const image = new Image();
+      image.src = data;
+      await image.decode();
+      if (version === this.uploadVersion) this.bannerImageChange.emit(data);
+    } catch {
+      if (version === this.uploadVersion)
+        this.imageError.set(
+          "This image could not be opened. Please choose another file.",
+        );
+    }
+  }
+  deleteBanner() {
+    if (confirm("Delete the form banner image?")) {
+      this.uploadVersion++;
+      this.bannerImageChange.emit(undefined);
+      this.imageError.set("");
+    }
+  }
   fields = input.required<Field[]>();
   fieldsChange = output<Field[]>();
   sections = [
@@ -184,6 +252,7 @@ export class FormSettings {
     );
   }
   remove(field: Field, key: "visibleWhen" | "requiredWhen") {
+    if (!confirm("Delete this conditional rule?")) return;
     this.fieldsChange.emit(
       this.fields().map((f) => {
         if (f.id !== field.id) return f;

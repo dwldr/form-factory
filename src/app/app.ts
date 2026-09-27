@@ -1,3 +1,4 @@
+import { Toast } from "./toast";
 import { Tooltip } from "./tooltip";
 import { ChromeState, HeaderActions } from "./chrome";
 import { computed, afterNextRender } from "@angular/core";
@@ -23,6 +24,7 @@ import { Store, readPreference } from "./store";
     "(document:click)": "closeOutsideMenus($event)",
   },
   imports: [
+    Toast,
     Tooltip,
     AccessibilityAudit,
     HeaderActions,
@@ -202,8 +204,8 @@ import { Store, readPreference } from "./store";
               @if (showSearch()) {
                 <label class="search"
                   ><ff-icon name="search" /><input
-                    aria-label="Search forms"
-                    placeholder="Search forms…"
+                    [attr.aria-label]="searchLabel()"
+                    [placeholder]="searchLabel() + '…'"
                     [value]="store.query()"
                     (input)="search($event)"
                 /></label>
@@ -220,12 +222,7 @@ import { Store, readPreference } from "./store";
         </div>
       </div>
     }
-    <div class="toast" role="status" [class.hidden]="!store.notice()">
-      {{ store.notice()
-      }}<button aria-label="Dismiss notification" (click)="store.notify('')">
-        ✕
-      </button>
-    </div>
+    <ff-toast />
   `,
 })
 export class App {
@@ -239,8 +236,13 @@ export class App {
   collapsed = signal(readPreference("ff-sidebar-collapsed") === "true");
   bannerHeight = signal(0);
   routeUrl = signal(this.router.url);
-  showSearch = computed(
-    () => !/^\/(templates|insights)(\/|[?#]|$)/.test(this.routeUrl()),
+  showSearch = () => true;
+  searchLabel = computed(() =>
+    this.routeUrl().startsWith("/templates")
+      ? "Search templates"
+      : /^\/(insights|responses)(\/|[?#]|$)/.test(this.routeUrl())
+        ? "Search responses"
+        : "Search forms",
   );
   standalone = computed(
     () =>
@@ -290,9 +292,7 @@ export class App {
         this.menu.set(false);
         this.profile.set(false);
         this.notifications.set(false);
-        if (
-          document.activeElement?.getAttribute("aria-label") !== "Search forms"
-        )
+        if (!document.activeElement?.closest(".search"))
           requestAnimationFrame(() => document.getElementById("main")?.focus());
       }
     });
@@ -356,6 +356,7 @@ export class App {
   }
   dismiss() {
     this.banner.set(false);
+    this.bannerHeight.set(0);
   }
   reset() {
     if (
@@ -372,9 +373,14 @@ export class App {
     this.store.query.set(q);
     const tree = this.router.parseUrl(this.router.url);
     const path = this.router.url.split(/[?#]/)[0];
-    const destination = ["/", "/forms", "/shared"].includes(path)
-      ? path
-      : "/forms";
+    const destination =
+      path === "/templates"
+        ? "/templates"
+        : /^\/(insights|responses)(\/|$)/.test(path)
+          ? "/responses"
+          : ["/", "/forms", "/shared"].includes(path)
+            ? path
+            : "/forms";
     void this.router.navigate([destination], {
       queryParams: { q: q || null },
       replaceUrl: !!tree.queryParams["q"],

@@ -89,7 +89,51 @@ import { Icon } from "./icon";
           tabindex="-1"
           aria-label="Form content"
         >
+          <div class="form-edit-heading">
+            <button
+              class="text-button edit-mode-toggle"
+              [class.active]="editMode()"
+              [attr.aria-pressed]="editMode()"
+              (click)="toggleEditMode()"
+            >
+              <ff-icon name="pencil" />Edit
+            </button>
+          </div>
+          @if (editMode()) {
+            <div
+              class="question-delete-toolbar"
+              role="group"
+              aria-label="Delete questions"
+            >
+              <button
+                class="danger delete-action"
+                [disabled]="!checkedFields().length"
+                (click)="deleteQuestions(false)"
+              >
+                <ff-icon name="trash" />Delete selected ({{
+                  checkedFields().length
+                }})
+              </button>
+              <button
+                class="danger delete-action"
+                [disabled]="!displayFields().length"
+                (click)="deleteQuestions(true)"
+              >
+                <ff-icon name="trash" />Delete all
+              </button>
+              <button class="secondary" (click)="toggleEditMode()">
+                Cancel
+              </button>
+            </div>
+          }
           <div class="form-paper">
+            @if (f.bannerImage) {
+              <img
+                class="form-banner-image"
+                [src]="f.bannerImage"
+                alt="Form banner"
+              />
+            }
             <label class="sr-only" for="form-title">Form title</label
             ><input
               id="form-title"
@@ -105,86 +149,114 @@ import { Icon } from "./icon";
               [value]="f.description"
               (input)="updateForm('description', $event)"
             ></textarea>
-            @for (field of f.fields; track field.id; let i = $index) {
+            @for (field of displayFields(); track field.id; let i = $index) {
               <div
                 class="field-card"
                 [attr.data-field-index]="i"
                 [class.selected]="selected() === field.id"
                 [class.page-break-card]="field.type === 'Page break'"
                 [class.drag-over]="dropTarget() === i"
+                [class.drag-source]="dragging() === i"
+                [class.question-edit-mode]="editMode()"
+                [class.field-placeholder]="field.id === placeholderId"
               >
+                @if (editMode()) {
+                  <input
+                    class="question-checkbox"
+                    type="checkbox"
+                    [attr.aria-label]="'Select ' + field.label"
+                    [checked]="checkedFields().includes(field.id)"
+                    (change)="checkField(field.id, $event)"
+                  />
+                }
                 <button
+                  [id]="
+                    field.id === placeholderId
+                      ? 'field-placeholder'
+                      : 'preview-' + field.id
+                  "
                   class="field-preview"
                   (click)="selectField(field.id)"
-                  [attr.aria-label]="'Edit ' + field.label"
+                  [attr.aria-label]="
+                    field.id === placeholderId
+                      ? 'Choose an input type'
+                      : 'Edit ' + field.label
+                  "
                 >
-                  <strong
-                    >{{ field.label }}{{ field.required ? " *" : "" }}</strong
-                  >
-                  @if (field.description) {
-                    <small>{{ field.description }}</small>
-                  }
-                  @if (
-                    field.type === "Multiple choice" ||
-                    field.type === "Checkboxes"
-                  ) {
-                    @for (option of field.options; track $index) {
-                      <span class="mock-option"
-                        ><span
-                          class="mock-radio"
-                          [class.square]="field.type === 'Checkboxes'"
-                        ></span
-                        >{{ option }}</span
-                      >
-                    }
+                  @if (field.id === placeholderId) {
+                    <strong>Choose an input type</strong
+                    ><span class="helper"
+                      >Select a field type from the Field panel.</span
+                    >
                   } @else {
-                    @switch (field.type) {
-                      @case ("Paragraph") {
-                        <span class="mock-input mock-textarea"
-                          >Your answer…</span
+                    <strong
+                      >{{ field.label }}{{ field.required ? " *" : "" }}</strong
+                    >
+                    @if (field.description) {
+                      <small>{{ field.description }}</small>
+                    }
+                    @if (
+                      field.type === "Multiple choice" ||
+                      field.type === "Checkboxes"
+                    ) {
+                      @for (option of field.options; track $index) {
+                        <span class="mock-option"
+                          ><span
+                            class="mock-radio"
+                            [class.square]="field.type === 'Checkboxes'"
+                          ></span
+                          >{{ option }}</span
                         >
                       }
-                      @case ("Address") {
-                        <span class="mock-input mock-textarea"
-                          >Street address, city, postal code…</span
-                        >
-                      }
-                      @case ("Dropdown") {
-                        <span class="mock-input mock-select"
-                          ><span>{{
-                            field.defaultValue || "Choose an option"
-                          }}</span
-                          ><span aria-hidden="true">⌄</span></span
-                        >
-                      }
-                      @case ("Date") {
-                        <span class="mock-input mock-select"
-                          ><span>mm/dd/yyyy</span><ff-icon name="calendar"
-                        /></span>
-                      }
-                      @case ("File upload") {
-                        <span class="mock-file"
-                          ><span class="file-button">Choose file</span
-                          ><span>No file selected</span></span
-                        >
-                      }
-                      @case ("Page break") {
-                        <span class="page-break-preview"
-                          >Page break · Page {{ pageNumber(i) }} starts
-                          below</span
-                        >
-                      }
-                      @case ("Section") {
-                        <span class="helper">Section heading</span>
-                      }
-                      @case ("Hidden field") {
-                        <span class="helper">Hidden from respondents</span>
-                      }
-                      @case ("Rating") {
-                        <span class="mock-input">☆ ☆ ☆ ☆ ☆</span>
-                      }
-                      @default {
-                        <span class="mock-input">Your answer…</span>
+                    } @else {
+                      @switch (field.type) {
+                        @case ("Paragraph") {
+                          <span class="mock-input mock-textarea"
+                            >Your answer…</span
+                          >
+                        }
+                        @case ("Address") {
+                          <span class="mock-input mock-textarea"
+                            >Street address, city, postal code…</span
+                          >
+                        }
+                        @case ("Dropdown") {
+                          <span class="mock-input mock-select"
+                            ><span>{{
+                              field.defaultValue || "Choose an option"
+                            }}</span
+                            ><span aria-hidden="true">⌄</span></span
+                          >
+                        }
+                        @case ("Date") {
+                          <span class="mock-input mock-select"
+                            ><span>mm/dd/yyyy</span><ff-icon name="calendar"
+                          /></span>
+                        }
+                        @case ("File upload") {
+                          <span class="mock-file"
+                            ><span class="file-button">Choose file</span
+                            ><span>No file selected</span></span
+                          >
+                        }
+                        @case ("Page break") {
+                          <span class="page-break-preview"
+                            >Page break · Page {{ pageNumber(i) }} starts
+                            below</span
+                          >
+                        }
+                        @case ("Section") {
+                          <span class="helper">Section heading</span>
+                        }
+                        @case ("Hidden field") {
+                          <span class="helper">Hidden from respondents</span>
+                        }
+                        @case ("Rating") {
+                          <span class="mock-input">☆ ☆ ☆ ☆ ☆</span>
+                        }
+                        @default {
+                          <span class="mock-input">Your answer…</span>
+                        }
                       }
                     }
                   }
@@ -210,20 +282,22 @@ import { Icon } from "./icon";
                   >
                     ↑</button
                   ><button
-                    [disabled]="i === f.fields.length - 1"
+                    [disabled]="i === displayFields().length - 1"
                     (click)="move(i, 1)"
                     [attr.aria-label]="'Move ' + field.label + ' down'"
                   >
                     ↓
                   </button>
                 </div>
-                <button
-                  class="delete-field icon-button"
-                  (click)="deleteField(field.id)"
-                  [attr.aria-label]="'Delete ' + field.label"
-                >
-                  <ff-icon name="trash" />
-                </button>
+                @if (editMode()) {
+                  <button
+                    class="delete-field icon-button"
+                    (click)="deleteField(field.id)"
+                    [attr.aria-label]="'Delete ' + field.label"
+                  >
+                    <ff-icon name="trash" />
+                  </button>
+                }
               </div>
             }
             <button
@@ -246,7 +320,7 @@ import { Icon } from "./icon";
               (click)="setPanelTab('settings')"
               (keydown)="tabKey($event, 'settings')"
             >
-              Form Settings
+              Form
             </button>
             <button
               id="add-tab"
@@ -257,7 +331,7 @@ import { Icon } from "./icon";
               (click)="setPanelTab('add')"
               (keydown)="tabKey($event, 'add')"
             >
-              Add Field
+              Field
             </button>
           </div>
           @if (panelTab() === "settings") {
@@ -267,6 +341,8 @@ import { Icon } from "./icon";
               aria-labelledby="settings-tab"
             >
               <ff-form-settings
+                [bannerImage]="f.bannerImage"
+                (bannerImageChange)="store.update(id, { bannerImage: $event })"
                 [fields]="f.fields"
                 (fieldsChange)="store.update(id, { fields: $event })"
               />
@@ -432,6 +508,67 @@ export class Editor {
   active = computed(() =>
     this.form()?.fields.find((f) => f.id === this.selected()),
   );
+  readonly placeholderId = "__new-field-placeholder";
+  pendingIndex = linkedSignal({
+    source: () => this.id,
+    computation: (): number | null => null,
+  });
+  editMode = linkedSignal({ source: () => this.id, computation: () => false });
+  checkedFields = signal<string[]>([]);
+  displayFields = computed(() => {
+    const fields = [...(this.form()?.fields ?? [])];
+    const index = this.pendingIndex();
+    if (index !== null)
+      fields.splice(Math.min(index, fields.length), 0, {
+        id: this.placeholderId,
+        type: "Text input",
+        label: "New field placeholder",
+        description: "",
+        required: false,
+        options: [],
+      });
+    return fields;
+  });
+  toggleEditMode() {
+    this.editMode.update((value) => !value);
+    this.checkedFields.set([]);
+  }
+  checkField(id: string, event: Event) {
+    this.checkedFields.update((ids) =>
+      (event.target as HTMLInputElement).checked
+        ? [...ids, id]
+        : ids.filter((value) => value !== id),
+    );
+  }
+  deleteQuestions(all: boolean) {
+    const ids = all
+      ? this.displayFields().map((field) => field.id)
+      : this.checkedFields();
+    if (
+      !ids.length ||
+      !confirm(
+        all
+          ? "Delete all questions in this form?"
+          : `Delete ${ids.length} selected questions?`,
+      )
+    )
+      return;
+    this.removeFields(ids);
+  }
+  removeFields(ids: string[]) {
+    const fields = this.displayFields().filter(
+      (field) => !ids.includes(field.id),
+    );
+    const pending = fields.findIndex(
+      (field) => field.id === this.placeholderId,
+    );
+    this.pendingIndex.set(pending < 0 ? null : pending);
+    this.store.update(this.id, {
+      fields: fields.filter((field) => field.id !== this.placeholderId),
+    });
+    this.checkedFields.set([]);
+    if (ids.includes(this.selected() ?? "")) this.selected.set(null);
+  }
   fieldQuery = signal("");
   types: FieldType[] = [
     "Text input",
@@ -480,6 +617,10 @@ export class Editor {
   );
   selectField(id: string) {
     this.panelTab.set("add");
+    if (id === this.placeholderId) {
+      this.selected.set(null);
+      return;
+    }
     this.selected.set(id);
     requestAnimationFrame(() =>
       (
@@ -511,8 +652,10 @@ export class Editor {
   showPicker() {
     this.panelTab.set("add");
     this.selected.set(null);
+    if (this.pendingIndex() === null)
+      this.pendingIndex.set(this.form()?.fields.length ?? 0);
     requestAnimationFrame(() =>
-      document.getElementById("field-search")?.focus(),
+      document.getElementById("field-placeholder")?.focus(),
     );
   }
   value(e: Event) {
@@ -548,7 +691,8 @@ export class Editor {
   }
   removeOption(i: number) {
     const field = this.active();
-    if (field) this.patch({ options: field.options.filter((_, j) => j !== i) });
+    if (field && confirm("Delete this option?"))
+      this.patch({ options: field.options.filter((_, j) => j !== i) });
   }
   add(type: FieldType) {
     const f = this.form();
@@ -561,27 +705,42 @@ export class Editor {
             ? "Section heading"
             : "Untitled question",
       );
-      this.store.update(this.id, { fields: [...f.fields, field] });
+      const fields = [...f.fields];
+      fields.splice(
+        Math.min(this.pendingIndex() ?? fields.length, fields.length),
+        0,
+        field,
+      );
+      this.pendingIndex.set(null);
+      this.store.update(this.id, { fields });
       this.selectField(field.id);
     }
   }
   deleteField(id: string) {
-    const f = this.form();
-    if (f && confirm("Remove this question?")) {
-      this.store.update(this.id, {
-        fields: f.fields.filter((field) => field.id !== id),
-      });
-      this.selected.set(null);
-    }
+    if (
+      confirm(
+        id === this.placeholderId
+          ? "Delete this field placeholder?"
+          : "Remove this question?",
+      )
+    )
+      this.removeFields([id]);
   }
   move(i: number, delta: number) {
     this.reorder(i, i + delta);
   }
   reorder(from: number, to: number) {
     const f = this.form();
-    if (!f || to < 0 || to >= f.fields.length || from === to) return;
-    const fields = moveField(f.fields, from, to);
-    this.store.update(this.id, { fields });
+    if (!f || to < 0 || to >= this.displayFields().length || from === to)
+      return;
+    const fields = moveField(this.displayFields(), from, to);
+    const pending = fields.findIndex(
+      (field) => field.id === this.placeholderId,
+    );
+    this.pendingIndex.set(pending < 0 ? null : pending);
+    this.store.update(this.id, {
+      fields: fields.filter((field) => field.id !== this.placeholderId),
+    });
     this.reorderNotice.set(
       fields[to].label +
         " moved to position " +
@@ -596,7 +755,7 @@ export class Editor {
       (event.key === "ArrowUp" || event.key === "ArrowDown")
     ) {
       event.preventDefault();
-      const id = this.form()?.fields[i].id;
+      const id = this.displayFields()[i].id;
       this.move(i, event.key === "ArrowUp" ? -1 : 1);
       requestAnimationFrame(() =>
         document.getElementById("drag-" + id)?.focus(),
@@ -636,9 +795,9 @@ export class Editor {
   }
   pageNumber(i: number) {
     return (
-      (this.form()
-        ?.fields.slice(0, i + 1)
-        .filter((field) => field.type === "Page break").length ?? 0) + 1
+      this.displayFields()
+        .slice(0, i + 1)
+        .filter((field) => field.type === "Page break").length + 1
     );
   }
   setVisibility(event: Event) {
@@ -663,6 +822,8 @@ export class Editor {
           : "Delete this unpublished form draft?",
       )
     ) {
+      this.pendingIndex.set(null);
+      this.checkedFields.set([]);
       this.store.discard(f.id);
       this.selected.set(null);
       if (!f.published) void this.router.navigate(["/forms"]);

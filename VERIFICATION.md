@@ -42,3 +42,14 @@ Sharing is browser-local; there is no real server or account system. Historical 
 - Published a private form. Signed-out and unauthorized Alex accounts saw the permission message; switching back to Derek restored access. Checked that the copy-link action reports success and private links use the private route.
 - The updated desktop editor's axe audit reported zero violations (color contrast still requires manual review). Checked the updated editor at 320px with no horizontal document overflow; its mobile navigation opened and closed with Escape. These are bounded checks, not a complete accessibility certification.
 - Loaded the application through http://192.168.1.20:4200 after configuring the development server to bind to 0.0.0.0. No firewall rules were changed. Connectivity from a second physical device has not been tested.
+
+## Latest application updates — September 27, 2026
+
+- Production build and formatting checks pass; all 18 automated tests pass, including banner-image draft/publication isolation and restoration.
+- Verified outside-click closing of account and notification menus, immediate sidebar repositioning after banner dismissal, and toast progress pausing while keyboard focus remains inside. The user subsequently verified that the sidebar gap is fixed in Firefox.
+- Verified template search, minimal dark template artwork, larger dashboard icons, Insights response search, and the recent-responses anchor.
+- Created and published a temporary form, submitted an answer, found it through My Responses search, and opened its answer detail and breadcrumbs.
+- Verified placeholder focus and reordering, replacement at the selected position, edit-mode deletion controls, selected/all question deletion, and banner upload, publication, and removal.
+- Checked editor and Insights at a 390px viewport without horizontal overflow. Restored the original light theme and removed the temporary form and response after testing.
+- Banner images are stored as local data URLs; respondent file questions still retain filenames only. Historical seeded response totals do not represent individual response records.
+- The development launcher now listens only on localhost and the specified Ethernet address, superseding the earlier wildcard-binding check above.

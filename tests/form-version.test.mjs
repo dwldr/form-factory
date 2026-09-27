@@ -50,3 +50,13 @@ test('rules are included in published snapshots and restored when discarding a d
  assert.equal(hasDraft(source),true); assert.equal(discardDraft(source).fields[1].requiredWhen,undefined);
  const live=publishForm(source); source.fields[1].requiredWhen.value='changed'; assert.equal(live.published.fields[1].requiredWhen.value,'');
 });
+
+
+test('banner changes stay in drafts and discard restores absence or the published image',()=>{
+ const form=publishForm(make()); form.bannerImage='data:image/png;base64,AAAA';
+ assert.equal(form.published.bannerImage,undefined); assert.equal(hasDraft(form),true);
+ assert.equal(discardDraft(form).bannerImage,undefined);
+ const published=publishForm(form); published.bannerImage=undefined;
+ assert.equal(discardDraft(published).bannerImage,'data:image/png;base64,AAAA');
+ assert.equal(publishForm(published).published.bannerImage,undefined);
+});

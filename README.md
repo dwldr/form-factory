@@ -25,7 +25,11 @@ Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwar
 
 ## Form rules and duplication
 
-The editor opens on Form Settings. Add Field contains the field picker and individual question settings. Each question can have one conditional-display rule and one conditional-required rule based on an earlier question. Rules support matching an answer, not matching an answer, or checking whether it is answered. Comparisons ignore capitalization; checkbox answers match individual selected options. Hidden questions are excluded from submissions and validation. A deleted or reordered source makes its rule inactive until an earlier source is chosen again. Rules are saved in drafts and only become live when published.
+The editor opens on the Form tab. The Field tab contains the field picker and individual question settings. Add field creates a movable placeholder; choosing a field replaces it at that position. Edit mode exposes question checkboxes and confirmed individual/bulk deletion. The Form tab accepts an optional PNG, JPEG, or WebP banner up to 1 MB, stored locally and included in the published snapshot.
+
+Each question can have one conditional-display rule and one conditional-required rule based on an earlier question. Rules support matching an answer, not matching an answer, or checking whether it is answered. Comparisons ignore capitalization; checkbox answers match individual selected options. Hidden questions are excluded from submissions and validation. A deleted or reordered source makes its rule inactive until an earlier source is chosen again. Rules are saved in drafts and only become live when published.
+
+Templates have their own search. Insights links to My Responses, where actual submissions can be searched and opened individually. Toasts dismiss after six seconds with a progress indicator, pause while keyboard focus is inside them, and remain recorded in the notifications menu. Clicking outside the notifications or account menu closes it.
 
 Duplicate Form creates an independent unpublished draft with fresh field identifiers, preserved settings and rules, and no responses. Names use “copy”, “copy 2”, and subsequent available numbers.
 
@@ -46,4 +50,3 @@ npm run format:check
 For a development-only axe audit, open any route with `?audit=1`, then click **Run accessibility audit**. The auditor remains available while navigating within that tab. It is replaced by an empty component in production, so axe and its interface are excluded from the production build.
 
 See `VERIFICATION.md` for checks performed and remaining manual accessibility checks.
-

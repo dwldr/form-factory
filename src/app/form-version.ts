@@ -1,5 +1,6 @@
 import type { FormRecord, Field } from "./store";
 export interface FormSnapshot {
+  bannerImage?: string;
   name: string;
   description: string;
   fields: Field[];
@@ -8,6 +9,7 @@ export interface FormSnapshot {
 }
 export function snapshot(form: FormRecord): FormSnapshot {
   return structuredClone({
+    ...(form.bannerImage ? { bannerImage: form.bannerImage } : {}),
     name: form.name,
     description: form.description,
     fields: form.fields,
@@ -42,7 +44,12 @@ export function publishForm(form: FormRecord): FormRecord {
 }
 export function discardDraft(form: FormRecord): FormRecord | null {
   return form.published
-    ? { ...form, ...structuredClone(form.published), status: "Published" }
+    ? {
+        ...form,
+        ...structuredClone(form.published),
+        bannerImage: form.published.bannerImage,
+        status: "Published",
+      }
     : null;
 }
 export function canReadForm(form: FormRecord, user: string | null): boolean {

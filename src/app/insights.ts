@@ -1,8 +1,10 @@
 import { Component, computed, inject, signal } from "@angular/core";
 import { DatePipe, DecimalPipe } from "@angular/common";
 import { Store } from "./store";
+import { RouterLink } from "@angular/router";
+import { Icon } from "./icon";
 @Component({
-  imports: [DatePipe, DecimalPipe],
+  imports: [DatePipe, DecimalPipe, RouterLink, Icon],
   template: `<section class="page">
     <div class="page-heading">
       <div>
@@ -20,22 +22,38 @@ import { Store } from "./store";
       >
     </div>
     <div class="stats-grid">
-      <div class="stat-card">
+      <a class="stat-card" routerLink="/responses">
+        <span class="stat-icon" aria-hidden="true"
+          ><ff-icon name="users"
+        /></span>
         <strong>{{ total() | number }}</strong>
         <p>Total responses</p>
-      </div>
-      <div class="stat-card">
+      </a>
+      <a class="stat-card" href="#recent-responses" (click)="recent($event)">
+        <span class="stat-icon" aria-hidden="true"
+          ><ff-icon name="chart"
+        /></span>
         <strong>{{ entries().length }}</strong>
         <p>New demo submissions</p>
-      </div>
-      <div class="stat-card">
+      </a>
+      <a class="stat-card" routerLink="/forms">
+        <span class="stat-icon" aria-hidden="true"
+          ><ff-icon name="forms"
+        /></span>
         <strong>{{ forms().length }}</strong>
         <p>Forms in this view</p>
-      </div>
-      <div class="stat-card">
+      </a>
+      <a
+        class="stat-card"
+        routerLink="/forms"
+        [queryParams]="{ status: 'Published' }"
+      >
+        <span class="stat-icon" aria-hidden="true"
+          ><ff-icon name="link"
+        /></span>
         <strong>{{ published() }}</strong>
         <p>Published forms</p>
-      </div>
+      </a>
     </div>
     <div class="analytics-grid">
       <section class="panel">
@@ -106,7 +124,7 @@ import { Store } from "./store";
         }
       </section>
     }
-    <section class="panel mt-6">
+    <section class="panel mt-6" id="recent-responses" tabindex="-1">
       <div class="section-heading">
         <h2>Recent demo responses</h2>
         <button
@@ -142,6 +160,12 @@ import { Store } from "./store";
   </section>`,
 })
 export class Insights {
+  recent(event: Event) {
+    event.preventDefault();
+    const section = document.getElementById("recent-responses");
+    section?.focus();
+    section?.scrollIntoView({ block: "start" });
+  }
   store = inject(Store);
   selected = signal("");
   forms = computed(() =>

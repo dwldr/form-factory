@@ -56,6 +56,7 @@ export interface Entry {
   labels?: Record<string, string>;
 }
 export interface FormRecord {
+  bannerImage?: string;
   published?: FormSnapshot | null;
   visibility?: "public" | "private";
   allowedUsers?: string[];
@@ -216,9 +217,18 @@ function validField(value: unknown): value is Field {
       typeof value["defaultValue"] === "string")
   );
 }
+function validBanner(value: unknown): boolean {
+  return (
+    value === undefined ||
+    (typeof value === "string" &&
+      value.length <= 1400000 &&
+      /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value))
+  );
+}
 function validSnapshot(value: unknown): boolean {
   return (
     record(value) &&
+    validBanner(value["bannerImage"]) &&
     typeof value["name"] === "string" &&
     typeof value["description"] === "string" &&
     Array.isArray(value["fields"]) &&
@@ -231,6 +241,7 @@ function validSnapshot(value: unknown): boolean {
 function validForm(value: unknown): value is FormRecord {
   if (!record(value)) return false;
   return (
+    validBanner(value["bannerImage"]) &&
     typeof value["id"] === "string" &&
     typeof value["name"] === "string" &&
     typeof value["description"] === "string" &&
@@ -281,6 +292,7 @@ export class Store {
   readonly forms = signal<FormRecord[]>(read());
   readonly query = signal("");
   private readonly toast = signal("");
+  readonly noticeVersion = signal(0);
   readonly notice = this.toast.asReadonly();
   readonly notificationHistory = signal<NotificationRecord[]>([]);
   readonly hasUnreadNotifications = computed(() =>
@@ -288,6 +300,7 @@ export class Store {
   );
   notify(message: string) {
     this.toast.set(message);
+    this.noticeVersion.update((version) => version + 1);
     if (message.trim())
       this.notificationHistory.update((records) =>
         addNotification(records, uniqueId(), message, new Date().toISOString()),

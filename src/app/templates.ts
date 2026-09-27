@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { Store, newField, Field } from "./store";
 @Component({
@@ -10,7 +10,7 @@ import { Store, newField, Field } from "./store";
       </div>
     </div>
     <div class="template-grid">
-      @for (t of templates; track t.name) {
+      @for (t of filtered(); track t.name) {
         <article class="template-card">
           <div class="template-art" [style.--template-color]="t.color">
             <span aria-hidden="true">{{ t.icon }}</span>
@@ -24,6 +24,8 @@ import { Store, newField, Field } from "./store";
             </button>
           </div>
         </article>
+      } @empty {
+        <p class="empty">No matching templates.</p>
       }
     </div>
   </section>`,
@@ -31,6 +33,13 @@ import { Store, newField, Field } from "./store";
 export class Templates {
   store = inject(Store);
   router = inject(Router);
+  filtered = computed(() =>
+    this.templates.filter((t) =>
+      `${t.name} ${t.category} ${t.description}`
+        .toLowerCase()
+        .includes(this.store.query().trim().toLowerCase()),
+    ),
+  );
   templates = [
     {
       name: "Customer Feedback",

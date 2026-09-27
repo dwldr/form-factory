@@ -2209,56 +2209,196 @@ select {
   width: 16px;
   height: 16px;
 }
-/* Layered color and fine texture add depth without changing light-mode art. */
+/* Minimal dark artwork keeps the light-mode composition. */
 .dark .template-art {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background:
-    radial-gradient(
-      ellipse at 18% 12%,
-      color-mix(in srgb, var(--template-color) 28%, transparent),
-      transparent 65%
-    ),
-    linear-gradient(
-      145deg,
-      var(--surface),
-      color-mix(in srgb, var(--template-color) 10%, var(--subtle))
-    );
-}
-.dark .template-art::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.2;
-  background-image: radial-gradient(
-    var(--template-color) 0.7px,
-    transparent 0.7px
-  );
-  background-size: 14px 14px;
-  mask-image: linear-gradient(110deg, #000, transparent 85%);
-}
-.dark .template-art::after {
-  content: "";
-  position: absolute;
-  width: 160px;
-  height: 160px;
-  right: -30px;
-  top: 25px;
-  border: 1px solid color-mix(in srgb, var(--template-color) 14%, transparent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 24px
-    color-mix(in srgb, var(--template-color) 4%, transparent);
-  z-index: -1;
+  background: color-mix(in srgb, var(--template-color) 14%, var(--surface));
 }
 .dark .template-art span {
-  background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--template-color) 14%, var(--surface)),
-    var(--surface)
-  );
-  box-shadow:
-    0 10px 24px #0005,
-    inset 0 1px color-mix(in srgb, var(--template-color) 25%, transparent);
+  background: color-mix(in srgb, var(--template-color) 7%, var(--surface));
+  box-shadow: 0 4px 12px #0002;
+}
+.toast {
+  overflow: hidden;
+}
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--yellow);
+  transform-origin: left;
+}
+.stat-icon ff-icon {
+  width: clamp(26px, 2.4vw, 34px);
+  height: clamp(26px, 2.4vw, 34px);
+}
+.stat-card strong {
+  display: block;
+  padding-right: 32px;
+}
+.response-breadcrumb {
+  margin-bottom: 18px;
+  font-size: 13px;
+}
+.response-breadcrumb a {
+  display: inline;
+  padding: 0;
+  border: 0;
+  color: var(--muted);
+}
+.response-detail dt {
+  font-weight: 650;
+  margin-top: 20px;
+}
+.response-detail dt:first-child {
+  margin-top: 0;
+}
+.response-detail dd {
+  margin-top: 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#recent-responses {
+  scroll-margin-top: 80px;
+}
+.form-edit-heading,
+.question-delete-toolbar {
+  max-width: 760px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-edit-heading {
+  justify-content: flex-end;
+}
+.edit-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+.edit-mode-toggle.active {
+  background: var(--active);
+  box-shadow: inset 0 0 0 1px var(--yellow);
+}
+.question-delete-toolbar {
+  position: sticky;
+  top: calc(var(--banner-height, 0px) + 64px);
+  z-index: 24;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+.delete-action {
+  background: #b91c1c;
+  color: #fff;
+  border-color: #b91c1c;
+}
+.dark .delete-action {
+  background: #b91c1c;
+  color: #fff;
+  border-color: #b91c1c;
+}
+.delete-action:hover,
+.delete-action:focus-visible {
+  background: #991b1b;
+}
+.delete-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.question-edit-mode {
+  padding-left: 38px;
+}
+.question-checkbox {
+  position: absolute;
+  top: 22px;
+  left: 12px;
+}
+.question-edit-mode .field-tools {
+  right: 45px;
+}
+.question-edit-mode .field-preview strong {
+  padding-right: 124px;
+}
+.question-edit-mode .delete-field {
+  top: 8px;
+  bottom: auto;
+  right: 8px;
+}
+.delete-field:hover,
+.delete-field:focus-visible {
+  background: #b91c1c;
+  color: #fff;
+}
+.field-placeholder {
+  border: 2px dashed #8190a1;
+  background: var(--subtle);
+}
+.field-placeholder .field-preview {
+  min-height: 90px;
+}
+.field-placeholder .helper {
+  display: block;
+  margin-top: 12px;
+}
+.field-card.drag-source {
+  outline: 3px solid #3984db;
+  outline-offset: 2px;
+}
+.description-input {
+  margin-bottom: 28px;
+}
+.form-banner-image {
+  display: block;
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 24px;
+}
+.banner-thumbnail {
+  width: 100%;
+  max-height: 120px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin: 12px 0;
+}
+.banner-settings {
+  margin-bottom: 24px;
+}
+.banner-settings h3 {
+  font-weight: 650;
+}
+.banner-settings label {
+  display: block;
+  margin-top: 14px;
+}
+.banner-settings input[type="file"] {
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .stat-card strong {
+    padding-right: 0;
+  }
+  .stat-icon {
+    top: 12px;
+    right: 10px;
+  }
+  .stat-card {
+    padding-top: 44px;
+  }
+  .question-delete-toolbar {
+    top: 98px;
+    padding: 8px;
+  }
+  .question-delete-toolbar button {
+    padding: 8px;
+    font-size: 11px;
+  }
 }

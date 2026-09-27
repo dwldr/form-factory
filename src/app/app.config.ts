@@ -29,6 +29,16 @@ export const appConfig: ApplicationConfig = {
         title: "Insights · Form Factory",
       },
       {
+        path: "responses",
+        loadComponent: () => import("./responses").then((m) => m.Responses),
+        title: "My Responses · Form Factory",
+      },
+      {
+        path: "responses/:formId/:entryId",
+        loadComponent: () => import("./responses").then((m) => m.Responses),
+        title: "Response · Form Factory",
+      },
+      {
         path: "settings",
         loadComponent: () => import("./team").then((m) => m.Team),
         title: "Team Settings · Form Factory",

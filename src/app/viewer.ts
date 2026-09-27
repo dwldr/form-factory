@@ -62,6 +62,13 @@ import { Store, Field } from "./store";
           }
         </div>
         <div class="response-paper" id="form-content" tabindex="-1">
+          @if (f.bannerImage) {
+            <img
+              class="form-banner-image"
+              [src]="f.bannerImage"
+              alt="Form banner"
+            />
+          }
           @if (submitted()) {
             <div class="empty">
               <span class="success-mark" aria-hidden="true">✓</span>
@@ -371,7 +378,7 @@ export class Viewer {
     if (!f) return undefined;
     if (this.preview()) return this.store.canEdit(f) ? f : undefined;
     return f.published && this.store.canRead(f)
-      ? { ...f, ...f.published }
+      ? { ...f, ...f.published, bannerImage: f.published.bannerImage }
       : undefined;
   });
   submitted = linkedSignal({ source: () => this.id, computation: () => false });
