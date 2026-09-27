@@ -30,9 +30,7 @@ import { Icon } from "./icon";
         <div class="flex gap-3 items-center">
           <ff-header-actions />
           <span class="saved">{{
-            store.persisted()
-              ? "Saved"
-              : "Not saved · storage unavailable"
+            store.persisted() ? "Saved" : "Not saved · storage unavailable"
           }}</span
           ><a
             class="secondary"
@@ -58,8 +56,7 @@ import { Icon } from "./icon";
             <strong>Unpublished draft</strong> · changes are not live
           } @else {
             Published version is up to date
-          }
-        </span
+          }</span
         ><label class="visibility-control"
           >Access<select
             aria-label="Form access"
@@ -91,7 +88,12 @@ import { Icon } from "./icon";
       </p>
       <div class="sr-only" role="status">{{ reorderNotice() }}</div>
       <div class="editor-layout">
-        <section class="editor-canvas">
+        <section
+          class="editor-canvas"
+          id="form-content"
+          tabindex="-1"
+          aria-label="Form content"
+        >
           <div class="form-paper">
             <label class="sr-only" for="form-title">Form title</label
             ><input

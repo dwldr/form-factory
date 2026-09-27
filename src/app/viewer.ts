@@ -61,7 +61,7 @@ import { Store, Field } from "./store";
             </button>
           }
         </div>
-        <div class="response-paper">
+        <div class="response-paper" id="form-content" tabindex="-1">
           @if (submitted()) {
             <div class="empty">
               <span class="success-mark" aria-hidden="true">✓</span>

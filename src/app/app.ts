@@ -38,10 +38,10 @@ function showDemoBanner(): boolean {
     NgOptimizedImage,
   ],
   template: `
+    <a class="skip-link" href="#main" (click)="skip($event)">Skip to content</a>
     @if (audit) {
       <ff-accessibility-audit />
     }
-    <a class="skip-link" href="#main" (click)="skip($event)">Skip to content</a>
     @if (standalone()) {
       <main id="main" class="standalone-main" tabindex="-1">
         <router-outlet />
@@ -307,7 +307,14 @@ export class App {
   }
   skip(event: Event) {
     event.preventDefault();
-    document.getElementById("main")?.focus();
+    this.menu.set(false);
+    requestAnimationFrame(() => {
+      const content =
+        document.getElementById("form-content") ??
+        document.getElementById("main");
+      content?.focus({ preventScroll: true });
+      content?.scrollIntoView({ block: "start" });
+    });
   }
   openMenu() {
     this.menu.set(true);

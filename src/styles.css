@@ -146,10 +146,19 @@ legend {
   left: 12px;
   padding: 12px;
   background: var(--surface);
-  z-index: 100;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px #0003;
+  z-index: 300;
 }
 .skip-link:focus {
   top: 8px;
+}
+#main,
+#form-content {
+  scroll-margin-top: calc(var(--banner-height, 0px) + 100px);
 }
 .demo-banner {
   background: #fff4b8;
