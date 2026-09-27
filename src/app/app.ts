@@ -88,7 +88,9 @@ function showDemoBanner(): boolean {
             @if (collapsed() && !menu()) {
               <img
                 [ngSrc]="
-                  dark() ? '/brand-img-white-yellow.svg' : '/brand-img-black.svg'
+                  dark()
+                    ? '/brand-img-white-yellow.svg'
+                    : '/brand-img-black.svg'
                 "
                 width="52"
                 height="47"
@@ -208,15 +210,18 @@ function showDemoBanner(): boolean {
                 (click)="openMenu()"
                 aria-controls="sidebar"
               >
-                ☰</button
-              ><label class="search"
-                ><ff-icon name="search" /><input
-                  aria-label="Search forms"
-                  placeholder="Search forms…"
-                  [value]="store.query()"
-                  (input)="search($event)"
-              /></label>
-              <div class="flex items-center gap-3">
+                ☰
+              </button>
+              @if (showSearch()) {
+                <label class="search"
+                  ><ff-icon name="search" /><input
+                    aria-label="Search forms"
+                    placeholder="Search forms…"
+                    [value]="store.query()"
+                    (input)="search($event)"
+                /></label>
+              }
+              <div class="flex items-center gap-3 ml-auto">
                 <ff-header-actions />
                 <button class="primary" (click)="create()">
                   <span aria-hidden="true">＋</span> New Form
@@ -250,6 +255,9 @@ export class App {
   collapsed = signal(readPreference("ff-sidebar-collapsed") === "true");
   bannerHeight = signal(0);
   routeUrl = signal(this.router.url);
+  showSearch = computed(
+    () => !/^\/(templates|insights)(\/|[?#]|$)/.test(this.routeUrl()),
+  );
   standalone = computed(
     () =>
       /^\/(f|private|account)(\/|[?#]|$)/.test(this.routeUrl()) ||

@@ -236,34 +236,42 @@ import { Icon } from "./icon";
               [class.add-active]="!selected()"
               (click)="showPicker()"
             >
-              ＋ Add a field
+              ＋ Add field
             </button>
           </div>
         </section>
         <aside class="field-panel" aria-label="Field settings">
           @if (active(); as field) {
             <div class="panel-heading">
-              <h2>{{ field.type }}</h2>
+              <h2>
+                <span class="field-heading-icon" aria-hidden="true">{{
+                  icons[field.type]
+                }}</span
+                >{{ field.type }}
+              </h2>
               <button
                 class="icon-button"
-                aria-label="Close field settings"
-                (click)="selected.set(null)"
+                id="field-settings-back"
+                aria-label="Back to field types"
+                (click)="showPicker()"
               >
-                ×
+                <ff-icon name="arrow-left" />
               </button>
             </div>
-            <label
-              >Label<input
-                id="field-label"
-                [value]="field.label"
-                (input)="change('label', $event)" /></label
-            ><label
-              >Description<textarea
-                rows="2"
-                [value]="field.description"
-                (input)="change('description', $event)"
-              ></textarea>
-            </label>
+            @if (field.type !== "Page break") {
+              <label
+                >Label<input
+                  id="field-label"
+                  [value]="field.label"
+                  (input)="change('label', $event)" /></label
+              ><label
+                >Description<textarea
+                  rows="2"
+                  [value]="field.description"
+                  (input)="change('description', $event)"
+                ></textarea>
+              </label>
+            }
             @if (hasOptions(field)) {
               <fieldset>
                 <legend>Options</legend>
@@ -433,7 +441,10 @@ export class Editor {
   selectField(id: string) {
     this.selected.set(id);
     requestAnimationFrame(() =>
-      document.getElementById("field-label")?.focus(),
+      (
+        document.getElementById("field-label") ??
+        document.getElementById("field-settings-back")
+      )?.focus(),
     );
   }
   showPicker() {

@@ -176,25 +176,31 @@ legend {
   text-decoration: underline;
   min-height: 28px;
 }
-.dark .demo-banner {
+.dark .demo-banner,
+.dark .preview-banner {
   background: #302c1c;
   color: #d6cfb2;
   box-shadow: inset 0 -1px #51472a;
 }
-.dark .demo-banner strong {
+.dark .demo-banner strong,
+.dark .preview-banner strong {
   color: #f7e6a1;
 }
-.dark .demo-banner button {
+.dark .demo-banner button,
+.dark .preview-banner button {
   color: #f7e6a1;
   border-radius: 4px;
   text-underline-offset: 3px;
 }
 .dark .demo-banner button:hover,
-.dark .demo-banner button:focus-visible {
+.dark .demo-banner button:focus-visible,
+.dark .preview-banner button:hover,
+.dark .preview-banner button:focus-visible {
   background: #51472a;
   color: #fff5cc;
 }
-.dark .demo-banner button:focus-visible {
+.dark .demo-banner button:focus-visible,
+.dark .preview-banner button:focus-visible {
   outline: 2px solid #f7e6a1;
   outline-offset: 3px;
 }
@@ -818,6 +824,16 @@ th input {
 }
 .panel-heading h2 {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.field-heading-icon {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  color: var(--muted);
+  font-size: 20px;
 }
 .option-row {
   display: flex;

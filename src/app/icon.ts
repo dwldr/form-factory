@@ -3,6 +3,7 @@ const paths: Record<string, string> = {
   trash: "M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7",
   grip: "M8 4h1 M15 4h1 M8 12h1 M15 12h1 M8 20h1 M15 20h1",
   "chevron-left": "m15 5-7 7 7 7",
+  "arrow-left": "M20 12H4 M11 5l-7 7 7 7",
   "chevron-right": "m9 5 7 7-7 7",
   calendar: "M3 5h18v16H3z M3 10h18 M7 3v4 M17 3v4",
 
