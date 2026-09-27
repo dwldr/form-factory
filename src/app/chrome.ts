@@ -1,15 +1,31 @@
-import { Component, Service, inject, signal } from "@angular/core";
+import { Component, DestroyRef, Service, inject, signal } from "@angular/core";
 import { Icon } from "./icon";
 import { readPreference } from "./store";
 @Service()
 export class ChromeState {
-  dark = signal(readPreference("ff-dark") === "true");
+  private systemTheme = matchMedia("(prefers-color-scheme: dark)");
+  private savedTheme = readPreference("ff-dark");
+  private followsSystem =
+    this.savedTheme !== "true" && this.savedTheme !== "false";
+  dark = signal(
+    this.followsSystem ? this.systemTheme.matches : this.savedTheme === "true",
+  );
   menu = signal(false);
   notifications = signal(false);
   constructor() {
     document.documentElement.classList.toggle("dark", this.dark());
+    const onSystemThemeChange = (event: MediaQueryListEvent) => {
+      if (!this.followsSystem) return;
+      this.dark.set(event.matches);
+      document.documentElement.classList.toggle("dark", this.dark());
+    };
+    this.systemTheme.addEventListener("change", onSystemThemeChange);
+    inject(DestroyRef).onDestroy(() =>
+      this.systemTheme.removeEventListener("change", onSystemThemeChange),
+    );
   }
   toggleTheme() {
+    this.followsSystem = false;
     this.dark.update((value) => !value);
     document.documentElement.classList.toggle("dark", this.dark());
     try {

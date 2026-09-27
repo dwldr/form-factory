@@ -1015,7 +1015,7 @@ th input {
     padding: 30px 46px;
   }
   .topbar {
-    padding: 20px 46px;
+    padding: 20px max(46px, calc((100% - 1600px) / 2 + 46px));
   }
   .editor-canvas {
     padding: 40px;
@@ -1704,11 +1704,16 @@ select {
   text-decoration: underline;
   min-height: 30px;
 }
-.public-link {
+.form-view-actions {
   position: fixed;
   right: 20px;
   bottom: 20px;
   z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-view-actions .icon-button {
   background: var(--surface);
   border: 1px solid #8190a1;
   box-shadow: 0 4px 12px #0001;

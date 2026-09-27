@@ -1,4 +1,5 @@
 import { Tooltip } from "./tooltip";
+import { ChromeState } from "./chrome";
 import { Icon } from "./icon";
 import { formPages } from "./form-version";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -35,20 +36,34 @@ import { Store, Field } from "./store";
             </div>
           </div>
         }
-        @if (!preview() && store.publicUrl(record()!); as url) {
+        <div class="form-view-actions">
           <button
-            class="public-link icon-button"
-            [ffTooltip]="url"
+            class="icon-button"
             [attr.aria-label]="
-              'Copy ' +
-              (f.visibility === 'private' ? 'private' : 'public') +
-              ' form link'
+              ui.dark() ? 'Switch to light mode' : 'Switch to dark mode'
             "
-            (click)="copy()"
+            [ffTooltip]="
+              ui.dark() ? 'Switch to light mode' : 'Switch to dark mode'
+            "
+            (click)="ui.toggleTheme()"
           >
-            <ff-icon name="link" />
+            <ff-icon [name]="ui.dark() ? 'moon' : 'sun'" />
           </button>
-        }
+          @if (!preview() && store.publicUrl(record()!); as url) {
+            <button
+              class="icon-button"
+              [ffTooltip]="url"
+              [attr.aria-label]="
+                'Copy ' +
+                (f.visibility === 'private' ? 'private' : 'public') +
+                ' form link'
+              "
+              (click)="copy()"
+            >
+              <ff-icon name="link" />
+            </button>
+          }
+        </div>
         <div class="response-paper">
           @if (submitted()) {
             <div class="empty">
@@ -314,6 +329,7 @@ import { Store, Field } from "./store";
   `,
 })
 export class Viewer {
+  ui = inject(ChromeState);
   store = inject(Store);
   route = inject(ActivatedRoute);
   params = toSignal(this.route.paramMap, { requireSync: true });

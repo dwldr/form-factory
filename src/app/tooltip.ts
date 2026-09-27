@@ -20,6 +20,7 @@ let tooltipId = 0;
 })
 export class Tooltip implements OnDestroy {
   ffTooltip = input<string | null>(null);
+  ffTooltipPosition = input<"bottom" | "right">("bottom");
   private element = inject<ElementRef<HTMLElement>>(ElementRef);
   private renderer = inject(Renderer2);
   private tip: HTMLElement | null = null;
@@ -36,12 +37,27 @@ export class Tooltip implements OnDestroy {
     tip.textContent = text;
     document.body.appendChild(tip);
     const bounds = tip.getBoundingClientRect();
+    const right = this.ffTooltipPosition() === "right";
     tip.style.left =
-      Math.max(8, Math.min(rect.left, innerWidth - bounds.width - 8)) + "px";
+      Math.max(
+        8,
+        Math.min(
+          right ? rect.right + 8 : rect.left,
+          innerWidth - bounds.width - 8,
+        ),
+      ) + "px";
     tip.style.top =
-      (rect.bottom + bounds.height + 10 < innerHeight
-        ? rect.bottom + 8
-        : Math.max(8, rect.top - bounds.height - 8)) + "px";
+      (right
+        ? Math.max(
+            8,
+            Math.min(
+              rect.top + (rect.height - bounds.height) / 2,
+              innerHeight - bounds.height - 8,
+            ),
+          )
+        : rect.bottom + bounds.height + 10 < innerHeight
+          ? rect.bottom + 8
+          : Math.max(8, rect.top - bounds.height - 8)) + "px";
     this.previousDescription = element.getAttribute("aria-describedby");
     element.setAttribute(
       "aria-describedby",

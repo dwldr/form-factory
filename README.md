@@ -9,7 +9,7 @@ npm install
 npm start
 ```
 
-Open http://localhost:4200. The development server listens on all network interfaces; other devices on the same LAN can use http://192.168.1.20:4200 while this computer’s address remains the same. A local firewall may need to allow Node on private networks. Each browser and origin has its own demo data; using the LAN address does not synchronize records across devices. Production output is generated in `dist/form-factory/browser` with `npm run build`.
+Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwards traffic from only the Ethernet address `192.168.1.20:4200`, including live-reload connections. It does not listen on wildcard or VPN addresses. If the Ethernet address changes, update `ethernetHost` in `scripts/dev-server.mjs`; startup fails rather than falling back to all interfaces. Press Ctrl+C to stop both listeners. A local firewall may need to allow Node on private networks. Each browser and origin has its own demo data; using the LAN address does not synchronize records across devices. Production output is generated in `dist/form-factory/browser` with `npm run build`.
 
 ## Included
 

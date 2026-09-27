@@ -108,6 +108,7 @@ import { Store, readPreference } from "./store";
                 (click)="menu.set(false)"
                 [attr.aria-label]="item.label"
                 [ffTooltip]="collapsed() && !menu() ? item.label : null"
+                ffTooltipPosition="right"
                 ><ff-icon [name]="item.icon" /><span class="nav-label">{{
                   item.label
                 }}</span></a
@@ -121,6 +122,7 @@ import { Store, readPreference } from "./store";
               (click)="menu.set(false)"
               aria-label="Team Settings"
               [ffTooltip]="collapsed() && !menu() ? 'Team Settings' : null"
+              ffTooltipPosition="right"
               ><ff-icon name="settings" /><span class="nav-label"
                 >Team Settings</span
               ></a
@@ -131,6 +133,7 @@ import { Store, readPreference } from "./store";
               (click)="menu.set(false)"
               aria-label="Members"
               [ffTooltip]="collapsed() && !menu() ? 'Members' : null"
+              ffTooltipPosition="right"
               ><ff-icon name="users" /><span class="nav-label">Members</span></a
             >
           </nav>
@@ -157,6 +160,7 @@ import { Store, readPreference } from "./store";
               class="user-button"
               [attr.aria-label]="accountName() + ' account menu'"
               [ffTooltip]="collapsed() && !menu() ? accountName() : null"
+              ffTooltipPosition="right"
               (click)="profile.set(!profile())"
               [attr.aria-expanded]="profile()"
             >
