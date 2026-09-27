@@ -67,6 +67,7 @@ import { Store } from "./store";
         <div class="flex gap-3 items-center">
           @if (selected().length) {
             <button class="danger" (click)="removeSelected()">
+              <ff-icon name="trash" />
               Delete selected ({{ selected().length }})
             </button>
           }
@@ -201,15 +202,6 @@ import { Store } from "./store";
                       "
                       >↗</a
                     >
-                    @if (!shared) {
-                      <button
-                        class="icon-button delete-form"
-                        [attr.aria-label]="'Delete ' + f.name"
-                        (click)="remove(f.id, f.name)"
-                      >
-                        <ff-icon name="trash" />
-                      </button>
-                    }
                   </div>
                 </td>
               </tr>
@@ -339,10 +331,6 @@ export class Dashboard {
         ? this.visible().map((f) => f.id)
         : [],
     );
-  }
-  remove(id: string, name: string) {
-    if (confirm("Delete “" + name + "” and its responses?"))
-      this.store.remove([id]);
   }
   removeSelected() {
     if (

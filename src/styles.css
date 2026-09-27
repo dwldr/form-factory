@@ -561,9 +561,6 @@ th input {
   padding-left: 0;
   white-space: nowrap;
 }
-.row-actions .delete-form {
-  margin-left: 10px;
-}
 .row-actions .icon-button {
   font-size: 18px;
   min-width: 28px;
