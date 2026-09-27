@@ -1,3 +1,4 @@
+import { Tooltip } from "./tooltip";
 import { Icon } from "./icon";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { map, startWith } from "rxjs";
@@ -12,7 +13,7 @@ import { DatePipe, DecimalPipe } from "@angular/common";
 import { Router, RouterLink } from "@angular/router";
 import { Store } from "./store";
 @Component({
-  imports: [Icon, RouterLink, DatePipe, DecimalPipe],
+  imports: [Tooltip, Icon, RouterLink, DatePipe, DecimalPipe],
   template: `
     <section class="page">
       <div class="page-heading">
@@ -100,6 +101,7 @@ import { Store } from "./store";
               <th scope="col">Status</th>
               <th scope="col">Responses</th>
               <th scope="col">Last Modified</th>
+              <th scope="col">Link</th>
               <th scope="col"><span class="sr-only">Actions</span></th>
             </tr>
           </thead>
@@ -119,7 +121,12 @@ import { Store } from "./store";
                 <td>
                   <a
                     class="form-name"
-                    [routerLink]="['/forms', f.id, shared ? 'view' : 'edit']"
+                    [routerLink]="
+                      shared ? store.publicPath(f) : ['/forms', f.id, 'edit']
+                    "
+                    [attr.target]="shared ? '_blank' : null"
+                    rel="noopener"
+                    (click)="shared && clearResultSearch()"
                     >{{ f.name }}</a
                   >
                 </td>
@@ -136,11 +143,44 @@ import { Store } from "./store";
                   {{ f.modified | date: "MMM d, y" : "UTC" }}
                 </td>
                 <td>
+                  @if (store.publicUrl(f); as url) {
+                    <button
+                      class="icon-button url-tooltip"
+                      [ffTooltip]="url"
+                      [attr.aria-label]="
+                        'Copy ' +
+                        f.name +
+                        ' ' +
+                        (f.published?.visibility === 'private'
+                          ? 'private'
+                          : 'public') +
+                        ' link'
+                      "
+                      (click)="store.copyUrl(f)"
+                    >
+                      <ff-icon name="link" />
+                    </button>
+                  } @else {
+                    <span class="muted" aria-label="No published link">—</span>
+                  }
+                </td>
+                <td>
                   <div class="row-actions">
                     <a
                       class="icon-button"
-                      [routerLink]="['/forms', f.id, 'view']"
-                      [attr.aria-label]="'View ' + f.name"
+                      [routerLink]="
+                        f.published
+                          ? store.publicPath(f)
+                          : ['/forms', f.id, 'preview']
+                      "
+                      target="_blank"
+                      rel="noopener"
+                      (click)="clearResultSearch()"
+                      [attr.aria-label]="
+                        (f.published ? 'View ' : 'Preview ') +
+                        f.name +
+                        ' (opens in a new tab)'
+                      "
                       >↗</a
                     >
                     @if (!shared) {
@@ -149,7 +189,7 @@ import { Store } from "./store";
                         [attr.aria-label]="'Delete ' + f.name"
                         (click)="remove(f.id, f.name)"
                       >
-                        ×
+                        <ff-icon name="trash" />
                       </button>
                     }
                   </div>
@@ -157,7 +197,7 @@ import { Store } from "./store";
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="empty">
+                <td colspan="7" class="empty">
                   <h3>No forms found</h3>
                   <p>Try another search or create your first form.</p>
                   <button class="secondary" (click)="clear()">
@@ -209,6 +249,7 @@ export class Dashboard {
       .filter(
         (f) =>
           f.shared === this.shared &&
+          (this.shared ? this.store.canRead(f) : this.store.canEdit(f)) &&
           f.name.toLowerCase().includes(this.store.query().toLowerCase()) &&
           (!this.status() || f.status === this.status()),
       ),
@@ -249,6 +290,12 @@ export class Dashboard {
       color: "#365ee8",
     },
   ]);
+  clearResultSearch() {
+    if (this.store.query()) {
+      this.store.query.set("");
+      void this.router.navigate([this.router.url.split(/[?#]/)[0]]);
+    }
+  }
   value(e: Event) {
     return (e.target as HTMLSelectElement).value;
   }
@@ -283,5 +330,6 @@ export class Dashboard {
   clear() {
     this.status.set("");
     this.store.query.set("");
+    void this.router.navigate([this.router.url.split(/[?#]/)[0]]);
   }
 }

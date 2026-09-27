@@ -1,5 +1,11 @@
 import { Component, computed, input } from "@angular/core";
 const paths: Record<string, string> = {
+  trash: "M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7",
+  grip: "M8 4h1 M15 4h1 M8 12h1 M15 12h1 M8 20h1 M15 20h1",
+  "chevron-left": "m15 5-7 7 7 7",
+  "chevron-right": "m9 5 7 7-7 7",
+  calendar: "M3 5h18v16H3z M3 10h18 M7 3v4 M17 3v4",
+
   home: "m3 10 9-7 9 7 M5 9v12h5v-7h4v7h5V9",
   forms: "M6 3h12v18H6z M9 7h6 M9 11h6 M9 15h4",
   users:

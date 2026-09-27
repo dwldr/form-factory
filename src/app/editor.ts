@@ -1,3 +1,5 @@
+import { ChromeState, HeaderActions } from "./chrome";
+import { moveField } from "./form-version";
 import { toSignal } from "@angular/core/rxjs-interop";
 import {
   Component,
@@ -6,31 +8,86 @@ import {
   signal,
   linkedSignal,
 } from "@angular/core";
-import { ActivatedRoute, RouterLink } from "@angular/router";
+import { ActivatedRoute, RouterLink, Router } from "@angular/router";
 import { Store, Field, FieldType, newField } from "./store";
 import { Icon } from "./icon";
 @Component({
-  imports: [RouterLink, Icon],
+  imports: [RouterLink, Icon, HeaderActions],
   template: `
     @if (form(); as f) {
       <h1 class="sr-only">Edit {{ f.name }}</h1>
       <div class="editor-toolbar">
+        <button
+          class="mobile-toggle icon-button"
+          aria-label="Toggle navigation"
+          (click)="ui.openMenu()"
+        >
+          ☰
+        </button>
         <nav aria-label="Breadcrumb">
           <a routerLink="/forms">My Forms</a><span> / </span>{{ f.name }}
         </nav>
         <div class="flex gap-3 items-center">
+          <ff-header-actions />
           <span class="saved">{{
             store.persisted()
               ? "Saved locally"
               : "Not saved · storage unavailable"
           }}</span
-          ><a class="secondary" [routerLink]="['/forms', f.id, 'view']"
+          ><a
+            class="secondary"
+            [routerLink]="['/forms', f.id, 'preview']"
+            target="_blank"
+            rel="noopener"
+            aria-label="Preview (opens in a new tab)"
             >Preview</a
           ><button class="primary" (click)="publish()">
-            {{ f.status === "Published" ? "Published ✓" : "Publish" }}
+            {{
+              f.published && !store.hasDraft(f)
+                ? "Published ✓"
+                : f.published
+                  ? "Publish changes"
+                  : "Publish"
+            }}
           </button>
         </div>
       </div>
+      <div class="draft-toolbar">
+        <span role="status">{{
+          store.hasDraft(f)
+            ? "Unpublished draft · changes are not live"
+            : "Published version is up to date"
+        }}</span
+        ><label class="visibility-control"
+          >Access<select
+            aria-label="Form access"
+            [value]="f.visibility ?? 'public'"
+            (change)="setVisibility($event)"
+          >
+            <option value="public">Public · anyone with the link</option>
+            <option value="private">Private · permitted accounts only</option>
+          </select></label
+        >
+        @if (f.visibility === "private") {
+          <label class="choice"
+            ><input
+              type="checkbox"
+              [checked]="f.allowedUsers?.includes('alex')"
+              (change)="allowAlex($event)"
+            />Allow Alex Morgan</label
+          >
+        }
+        @if (store.hasDraft(f)) {
+          <button class="text-button" (click)="discard()">
+            <ff-icon name="trash" /> Delete draft
+          </button>
+        }
+      </div>
+      <p class="sr-only" id="reorder-help">
+        Drag a handle to reorder questions, or focus it and press Alt plus Up or
+        Down. Arrow buttons also move questions.
+      </p>
+      <div class="sr-only" role="status">{{ reorderNotice() }}</div>
       <div class="editor-layout">
         <section class="editor-canvas">
           <div class="form-paper">
@@ -52,7 +109,10 @@ import { Icon } from "./icon";
             @for (field of f.fields; track field.id; let i = $index) {
               <div
                 class="field-card"
+                [attr.data-field-index]="i"
                 [class.selected]="selected() === field.id"
+                [class.page-break-card]="field.type === 'Page break'"
+                [class.drag-over]="dropTarget() === i"
               >
                 <button
                   class="field-preview"
@@ -65,7 +125,10 @@ import { Icon } from "./icon";
                   @if (field.description) {
                     <small>{{ field.description }}</small>
                   }
-                  @if (hasOptions(field)) {
+                  @if (
+                    field.type === "Multiple choice" ||
+                    field.type === "Checkboxes"
+                  ) {
                     @for (option of field.options; track $index) {
                       <span class="mock-option"
                         ><span
@@ -76,22 +139,71 @@ import { Icon } from "./icon";
                       >
                     }
                   } @else {
-                    <span class="mock-input">{{
-                      field.type === "Rating"
-                        ? "☆ ☆ ☆ ☆ ☆"
-                        : field.type === "Page break"
-                          ? "Next page →"
-                          : field.type === "Section"
-                            ? "Section heading"
-                            : field.type === "Hidden field"
-                              ? "Hidden from respondents"
-                              : field.type === "File upload"
-                                ? "Choose file…"
-                                : "Your answer…"
-                    }}</span>
+                    @switch (field.type) {
+                      @case ("Paragraph") {
+                        <span class="mock-input mock-textarea"
+                          >Your answer…</span
+                        >
+                      }
+                      @case ("Address") {
+                        <span class="mock-input mock-textarea"
+                          >Street address, city, postal code…</span
+                        >
+                      }
+                      @case ("Dropdown") {
+                        <span class="mock-input mock-select"
+                          ><span>{{
+                            field.defaultValue || "Choose an option"
+                          }}</span
+                          ><span aria-hidden="true">⌄</span></span
+                        >
+                      }
+                      @case ("Date") {
+                        <span class="mock-input mock-select"
+                          ><span>mm/dd/yyyy</span><ff-icon name="calendar"
+                        /></span>
+                      }
+                      @case ("File upload") {
+                        <span class="mock-file"
+                          ><span class="file-button">Choose file</span
+                          ><span>No file selected</span></span
+                        >
+                      }
+                      @case ("Page break") {
+                        <span class="page-break-preview"
+                          >Page break · Page {{ pageNumber(i) }} starts
+                          below</span
+                        >
+                      }
+                      @case ("Section") {
+                        <span class="helper">Section heading</span>
+                      }
+                      @case ("Hidden field") {
+                        <span class="helper">Hidden from respondents</span>
+                      }
+                      @case ("Rating") {
+                        <span class="mock-input">☆ ☆ ☆ ☆ ☆</span>
+                      }
+                      @default {
+                        <span class="mock-input">Your answer…</span>
+                      }
+                    }
                   }
                 </button>
                 <div class="field-tools">
+                  <button
+                    class="drag-handle"
+                    (pointerdown)="pointerStart($event, i)"
+                    (pointermove)="pointerMove($event)"
+                    (pointerup)="pointerEnd($event)"
+                    (pointercancel)="dragEnd()"
+                    [id]="'drag-' + field.id"
+                    [attr.aria-label]="'Reorder ' + field.label"
+                    aria-describedby="reorder-help"
+                    (keydown)="reorderKey($event, i)"
+                  >
+                    <ff-icon name="grip" />
+                  </button>
                   <button
                     [disabled]="i === 0"
                     (click)="move(i, -1)"
@@ -103,14 +215,16 @@ import { Icon } from "./icon";
                     (click)="move(i, 1)"
                     [attr.aria-label]="'Move ' + field.label + ' down'"
                   >
-                    ↓</button
-                  ><button
-                    (click)="deleteField(field.id)"
-                    [attr.aria-label]="'Delete ' + field.label"
-                  >
-                    ×
+                    ↓
                   </button>
                 </div>
+                <button
+                  class="delete-field icon-button"
+                  (click)="deleteField(field.id)"
+                  [attr.aria-label]="'Delete ' + field.label"
+                >
+                  <ff-icon name="trash" />
+                </button>
               </div>
             }
             <button
@@ -246,13 +360,18 @@ import { Icon } from "./icon";
 })
 export class Editor {
   store = inject(Store);
+  ui = inject(ChromeState);
+  router = inject(Router);
+  dragging = signal<number | null>(null);
+  dropTarget = signal<number | null>(null);
+  reorderNotice = signal("");
   route = inject(ActivatedRoute);
   params = toSignal(this.route.paramMap, { requireSync: true });
   get id() {
     return this.params().get("id")!;
   }
   form = computed(() =>
-    this.store.forms().find((f) => f.id === this.id && !f.shared),
+    this.store.forms().find((f) => f.id === this.id && this.store.canEdit(f)),
   );
   selected = linkedSignal({
     source: () => this.id,
@@ -357,7 +476,14 @@ export class Editor {
   add(type: FieldType) {
     const f = this.form();
     if (f) {
-      const field = newField(type);
+      const field = newField(
+        type,
+        type === "Page break"
+          ? "Page break"
+          : type === "Section"
+            ? "Section heading"
+            : "Untitled question",
+      );
       this.store.update(this.id, { fields: [...f.fields, field] });
       this.selectField(field.id);
     }
@@ -372,9 +498,99 @@ export class Editor {
     }
   }
   move(i: number, delta: number) {
-    const fields = [...(this.form()?.fields ?? [])];
-    [fields[i], fields[i + delta]] = [fields[i + delta], fields[i]];
+    this.reorder(i, i + delta);
+  }
+  reorder(from: number, to: number) {
+    const f = this.form();
+    if (!f || to < 0 || to >= f.fields.length || from === to) return;
+    const fields = moveField(f.fields, from, to);
     this.store.update(this.id, { fields });
+    this.reorderNotice.set(
+      fields[to].label +
+        " moved to position " +
+        (to + 1) +
+        " of " +
+        fields.length,
+    );
+  }
+  reorderKey(event: KeyboardEvent, i: number) {
+    if (
+      event.altKey &&
+      (event.key === "ArrowUp" || event.key === "ArrowDown")
+    ) {
+      event.preventDefault();
+      const id = this.form()?.fields[i].id;
+      this.move(i, event.key === "ArrowUp" ? -1 : 1);
+      requestAnimationFrame(() =>
+        document.getElementById("drag-" + id)?.focus(),
+      );
+    }
+  }
+  pointerStart(event: PointerEvent, i: number) {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    const handle = event.currentTarget as HTMLElement;
+    handle.focus();
+    handle.setPointerCapture(event.pointerId);
+    this.dragging.set(i);
+    this.dropTarget.set(i);
+  }
+  pointerMove(event: PointerEvent) {
+    if (this.dragging() === null) return;
+    const card = document
+      .elementFromPoint(event.clientX, event.clientY)
+      ?.closest<HTMLElement>("[data-field-index]");
+    if (card) this.dropTarget.set(Number(card.dataset["fieldIndex"]));
+    if (event.clientY < 100) window.scrollBy(0, -12);
+    else if (event.clientY > innerHeight - 80) window.scrollBy(0, 12);
+  }
+  pointerEnd(event: PointerEvent) {
+    const from = this.dragging(),
+      to = this.dropTarget();
+    if (from !== null && to !== null) this.reorder(from, to);
+    const handle = event.currentTarget as HTMLElement;
+    if (handle.hasPointerCapture(event.pointerId))
+      handle.releasePointerCapture(event.pointerId);
+    this.dragEnd();
+  }
+  dragEnd() {
+    this.dragging.set(null);
+    this.dropTarget.set(null);
+  }
+  pageNumber(i: number) {
+    return (
+      (this.form()
+        ?.fields.slice(0, i + 1)
+        .filter((field) => field.type === "Page break").length ?? 0) + 1
+    );
+  }
+  setVisibility(event: Event) {
+    this.store.update(this.id, {
+      visibility: this.value(event) === "private" ? "private" : "public",
+    });
+  }
+  allowAlex(event: Event) {
+    this.store.update(this.id, {
+      allowedUsers: (event.target as HTMLInputElement).checked
+        ? ["derek", "alex"]
+        : ["derek"],
+    });
+  }
+  discard() {
+    const f = this.form();
+    if (
+      f &&
+      confirm(
+        f.published
+          ? "Delete all unpublished changes and restore the published form?"
+          : "Delete this unpublished form draft?",
+      )
+    ) {
+      this.store.discard(f.id);
+      this.selected.set(null);
+      if (!f.published) void this.router.navigate(["/forms"]);
+      this.store.notice.set("Draft deleted.");
+    }
   }
   publish() {
     const f = this.form();
@@ -393,9 +609,9 @@ export class Editor {
       );
       return;
     }
-    this.store.update(this.id, { status: "Published" });
+    this.store.publish(this.id);
     this.store.notice.set(
-      "Published in this demo. Use Preview to fill out your form. Links work in this browser only.",
+      "Published successfully. The form link now shows this version.",
     );
   }
 }

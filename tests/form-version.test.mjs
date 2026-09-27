@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+const source=await readFile(new URL('../src/app/form-version.ts',import.meta.url),'utf8');
+const {outputText}=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}});
+const {snapshot,migrateForm,hasDraft,publishForm,discardDraft,canReadForm,moveField,formPages}=await import('data:text/javascript;base64,'+Buffer.from(outputText).toString('base64'));
+const field=(id,type='Text input')=>({id,type,label:id,description:'',required:false,options:[]});
+const make=()=>({id:'test',name:'Original',description:'Live description',status:'Published',responses:5,modified:'2026-09-26',shared:false,fields:[field('one'),field('two')],entries:[]});
+test('legacy published forms migrate without losing responses or creating a draft',()=>{const f=migrateForm(make());assert.equal(f.responses,5);assert.equal(f.published.name,'Original');assert.equal(hasDraft(f),false);});
+test('draft title and nested options never mutate the published snapshot',()=>{const f=migrateForm(make());f.name='Draft';f.fields[0].options.push('New option');assert.equal(f.published.name,'Original');assert.deepEqual(f.published.fields[0].options,[]);assert.equal(hasDraft(f),true);});
+test('publish replaces the live version and clears unpublished changes',()=>{const f=migrateForm(make());f.name='Revision';const live=publishForm(f);assert.equal(live.published.name,'Revision');assert.equal(hasDraft(live),false);assert.equal(live.responses,5);f.fields[0].label='Later change';assert.equal(live.published.fields[0].label,'one');});
+test('discard restores the published version and preserves responses',()=>{const f=migrateForm(make());f.name='Discard me';f.fields=[];const restored=discardDraft(f);assert.equal(restored.name,'Original');assert.equal(restored.fields.length,2);assert.equal(restored.responses,5);assert.equal(hasDraft(restored),false);});
+test('an unpublished form has no public version and discarding removes it',()=>{const f=migrateForm({...make(),status:'Draft'});assert.equal(f.published,null);assert.equal(canReadForm(f,'derek'),false);assert.equal(discardDraft(f),null);});
+test('private published access requires a permitted account',()=>{const f=publishForm({...make(),visibility:'private',allowedUsers:['derek']});assert.equal(canReadForm(f,'derek'),true);assert.equal(canReadForm(f,null),false);assert.equal(canReadForm(f,'guest'),false);assert.equal(canReadForm(f,'alex'),false);f.allowedUsers.push('alex');assert.equal(canReadForm(f,'alex'),false);assert.equal(canReadForm(publishForm(f),'alex'),true);});
+test('access changes remain drafts until published',()=>{let f=migrateForm(make());f.visibility='private';assert.equal(canReadForm(f,'guest'),true);f=publishForm(f);assert.equal(canReadForm(f,'guest'),false);assert.equal(canReadForm(f,'derek'),true);});
+test('page breaks create pages, including an explicit trailing page',()=>{const fields=[field('a'),field('break','Page break'),field('b'),field('end','Page break')];assert.deepEqual(formPages(fields).map(page=>page.map(f=>f.id)),[['a'],['b'],[]]);});
+test('keyboard and drag reorder use the same immutable movement semantics',()=>{const fields=[field('a'),field('b'),field('c')];assert.deepEqual(moveField(fields,0,2).map(f=>f.id),['b','c','a']);assert.deepEqual(fields.map(f=>f.id),['a','b','c']);assert.deepEqual(moveField(fields,2,0).map(f=>f.id),['c','a','b']);assert.equal(moveField(fields,0,-1),fields);assert.equal(moveField(fields,2,3),fields);});

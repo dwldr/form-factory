@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "format": "prettier --write \"src/app/*.ts\" src/styles.css src/main.ts",
-    "format:check": "prettier --check \"src/app/*.ts\" src/styles.css src/main.ts"
+    "format:check": "prettier --check \"src/app/*.ts\" src/styles.css src/main.ts",
+    "test": "node --test tests/*.test.mjs"
   },
   "private": true,
   "dependencies": {

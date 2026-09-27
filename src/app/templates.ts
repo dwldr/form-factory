@@ -111,6 +111,10 @@ export class Templates {
     },
   ];
   use(name: string, fields: Field[]) {
+    if (this.store.user() !== "derek") {
+      void this.router.navigate(["/account"]);
+      return;
+    }
     void this.router.navigate([
       "/forms",
       this.store.create(name, fields),

@@ -45,8 +45,33 @@ export const appConfig: ApplicationConfig = {
       },
       {
         path: "forms/:id/view",
+        data: { standalone: true },
         loadComponent: () => import("./viewer").then((m) => m.Viewer),
         title: "View form · Form Factory",
+      },
+      {
+        path: "forms/:id/preview",
+        loadComponent: () => import("./viewer").then((m) => m.Viewer),
+        data: { standalone: true, preview: true },
+        title: "Preview · Form Factory",
+      },
+      {
+        path: "f/:id",
+        loadComponent: () => import("./viewer").then((m) => m.Viewer),
+        data: { standalone: true },
+        title: "Form · Form Factory",
+      },
+      {
+        path: "private/:id",
+        loadComponent: () => import("./viewer").then((m) => m.Viewer),
+        data: { standalone: true },
+        title: "Private form · Form Factory",
+      },
+      {
+        path: "account",
+        loadComponent: () => import("./account").then((m) => m.Account),
+        data: { standalone: true },
+        title: "Demo account · Form Factory",
       },
       { path: "**", redirectTo: "" },
     ]),

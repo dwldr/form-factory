@@ -30,3 +30,15 @@ Axe marked color contrast for manual review in this browser. A separate computed
 ## Deliberate demo limitations
 
 Sharing is browser-local; there is no real server or account system. Historical sample data contains totals only. File uploads retain filenames only, signatures are typed demo responses, and team members are fixed sample data. Export, individual deletion, reset, all combinations of all field types, storage denial/quota, and every browser/assistive-technology combination have not received exhaustive end-to-end coverage.
+
+## Application updates — September 27, 2026
+
+- Added nine automated regression tests covering migration of existing local data, immutable published snapshots, publication, draft deletion, unpublished-link denial, private permissions, unpublished access changes, explicit page breaks, and immutable reordering. Run with `npm test`.
+- Browser-verified search query restoration using Back and absence of the global search/New Form row while editing.
+- Browser-verified sidebar collapse, image-only logo replacement, and keyboard-focus tooltips. Account control remains pinned at the viewport bottom.
+- Opened preview and published-view links and verified they create separate tabs without application navigation. Preview displayed the unpublished title while the public form retained the previously published title.
+- Published a revision and verified the already-open live tab received the new snapshot. Deleted unpublished changes through the preview banner and verified the published title and checkmark were restored.
+- Verified pointer dragging and Alt+ArrowUp reordering. Confirmed explicit page-break rendering in the builder and Page 1 of 2 in the published form.
+- Published a private form. Signed-out and unauthorized Alex accounts saw the permission message; switching back to Derek restored access. Checked that the copy-link action reports success and private links use the private route.
+- The updated desktop editor's axe audit reported zero violations (color contrast still requires manual review). Checked the updated editor at 320px with no horizontal document overflow; its mobile navigation opened and closed with Escape. These are bounded checks, not a complete accessibility certification.
+- Loaded the application through http://192.168.1.20:4200 after configuring the development server to bind to 0.0.0.0. No firewall rules were changed. Connectivity from a second physical device has not been tested.

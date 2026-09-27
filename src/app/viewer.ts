@@ -1,3 +1,6 @@
+import { Tooltip } from "./tooltip";
+import { Icon } from "./icon";
+import { formPages } from "./form-version";
 import { toSignal } from "@angular/core/rxjs-interop";
 import {
   Component,
@@ -9,30 +12,43 @@ import {
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { Store, Field } from "./store";
 @Component({
-  imports: [RouterLink],
+  imports: [Tooltip, RouterLink, Icon],
   template: `
-    <section class="page">
+    <section class="standalone-form">
       @if (form(); as f) {
-        <div class="page-heading">
-          <div>
-            <a routerLink="/forms">← Back to forms</a>
-            <p>
-              {{
-                f.status === "Draft"
-                  ? "Draft preview · submissions are not saved"
-                  : "Demo form · responses stay in this browser"
-              }}
-            </p>
-          </div>
-          <div class="flex gap-3">
-            @if (!f.shared) {
-              <a class="secondary" [routerLink]="['/forms', f.id, 'edit']"
-                >Edit form</a
+        @if (preview() && !previewDismissed()) {
+          <div class="preview-banner" role="region" aria-label="Form preview">
+            <span
+              ><strong>This is a preview only.</strong> Responses will not be
+              saved.</span
+            >
+            <div class="flex items-center gap-3">
+              @if (store.hasDraft(record()!)) {
+                <button (click)="discard()">Delete draft</button>
+              }
+              <button
+                aria-label="Dismiss preview banner"
+                (click)="previewDismissed.set(true)"
               >
-            }
-            <button class="secondary" (click)="copy()">Copy link</button>
+                ×
+              </button>
+            </div>
           </div>
-        </div>
+        }
+        @if (!preview() && store.publicUrl(record()!); as url) {
+          <button
+            class="public-link icon-button"
+            [ffTooltip]="url"
+            [attr.aria-label]="
+              'Copy ' +
+              (f.visibility === 'private' ? 'private' : 'public') +
+              ' form link'
+            "
+            (click)="copy()"
+          >
+            <ff-icon name="link" />
+          </button>
+        }
         <div class="response-paper">
           @if (submitted()) {
             <div class="empty">
@@ -40,7 +56,7 @@ import { Store, Field } from "./store";
               <h1>Thank you!</h1>
               <p>
                 {{
-                  f.status === "Draft"
+                  preview()
                     ? "Your preview is complete. No response was saved."
                     : "Your response has been recorded in this demo."
                 }}
@@ -101,14 +117,25 @@ import { Store, Field } from "./store";
                             ></textarea>
                           }
                           @case ("File upload") {
-                            <input
-                              type="file"
-                              [name]="field.id"
-                              [attr.aria-label]="field.label"
-                              [required]="
-                                field.required && step() === pageIndex
-                              "
-                            />
+                            <div class="file-upload-control">
+                              <label
+                                class="file-button"
+                                [for]="'file-' + field.id"
+                                >Choose file</label
+                              ><input
+                                class="sr-only"
+                                type="file"
+                                [id]="'file-' + field.id"
+                                [name]="field.id"
+                                [attr.aria-label]="field.label"
+                                [required]="
+                                  field.required && step() === pageIndex
+                                "
+                                (change)="fileSelected(field.id, $event)"
+                              /><span>{{
+                                fileNames()[field.id] || "No file selected"
+                              }}</span>
+                            </div>
                             <p class="helper">
                               Demo: only the filename is saved. File contents
                               are not uploaded.
@@ -251,7 +278,7 @@ import { Store, Field } from "./store";
                 {{
                   step() < pages().length - 1
                     ? "Next page"
-                    : f.status === "Draft"
+                    : preview()
                       ? "Test submission"
                       : "Submit response"
                 }}
@@ -261,9 +288,27 @@ import { Store, Field } from "./store";
           }
         </div>
       } @else {
-        <h1>Form not found</h1>
-        <p>This demo link requires the original browser’s local data.</p>
-        <a routerLink="/forms">Back to forms</a>
+        <div class="response-paper empty">
+          @if (denied()) {
+            <h1>You don’t have permission to view this form</h1>
+            <p>Log in with an account that has access.</p>
+            <a
+              class="primary"
+              routerLink="/account"
+              [queryParams]="{ returnTo: currentPath }"
+              >Log in or change accounts</a
+            >
+          } @else {
+            <h1>{{ deleted() ? "Draft deleted" : "Form unavailable" }}</h1>
+            <p>
+              {{
+                deleted()
+                  ? "This draft has been deleted. You can close this tab."
+                  : "This form is not published, has been removed, or is not available in this browser."
+              }}
+            </p>
+          }
+        </div>
       }
     </section>
   `,
@@ -275,19 +320,41 @@ export class Viewer {
   get id() {
     return this.params().get("id")!;
   }
-  form = computed(() => this.store.forms().find((f) => f.id === this.id));
+  currentPath = location.pathname;
+  routeData = toSignal(this.route.data, { requireSync: true });
+  preview = computed(() => this.routeData()["preview"] === true);
+  previewDismissed = signal(false);
+  deleted = signal(false);
+  record = computed(() => this.store.forms().find((f) => f.id === this.id));
+  denied = computed(() => {
+    const f = this.record();
+    return (
+      !!f &&
+      (this.preview()
+        ? !this.store.canEdit(f)
+        : !!f.published && !this.store.canRead(f))
+    );
+  });
+  form = computed(() => {
+    const f = this.record();
+    if (!f) return undefined;
+    if (this.preview()) return this.store.canEdit(f) ? f : undefined;
+    return f.published && this.store.canRead(f)
+      ? { ...f, ...f.published }
+      : undefined;
+  });
   submitted = linkedSignal({ source: () => this.id, computation: () => false });
   step = linkedSignal({ source: () => this.id, computation: () => 0 });
-  pages = computed(() => {
-    const pages: Field[][] = [[]];
-    for (const field of this.form()?.fields ?? []) {
-      if (field.type === "Page break") {
-        if (pages[pages.length - 1].length) pages.push([]);
-      } else pages[pages.length - 1].push(field);
-    }
-    return pages.filter((p, i) => p.length || i === 0);
-  });
+  pages = computed(() => formPages(this.form()?.fields ?? []));
+  fileNames = signal<Record<string, string>>({});
+  fileSelected(id: string, event: Event) {
+    this.fileNames.update((names) => ({
+      ...names,
+      [id]: (event.target as HTMLInputElement).files?.[0]?.name ?? "",
+    }));
+  }
   restart() {
+    this.fileNames.set({});
     this.step.set(0);
     this.submitted.set(false);
     this.error.set("");
@@ -334,20 +401,28 @@ export class Viewer {
       document.getElementById("main")?.focus();
       return;
     }
-    if (f.status === "Published") this.store.submit(f.id, answers);
+    if (!this.preview()) this.store.submit(f.id, answers);
     this.submitted.set(true);
     document.getElementById("main")?.focus();
   }
-  async copy() {
-    try {
-      await navigator.clipboard.writeText(location.href);
-      this.store.notice.set(
-        "Link copied. Demo links only work in this browser with its local data.",
-      );
-    } catch {
-      this.store.notice.set(
-        "Copy the address from your browser to share this local demo link.",
-      );
+  copy() {
+    const f = this.record();
+    if (f) void this.store.copyUrl(f);
+  }
+  discard() {
+    const f = this.record();
+    if (
+      f &&
+      confirm(
+        f.published
+          ? "Delete unpublished changes and restore the published form?"
+          : "Delete this unpublished draft?",
+      )
+    ) {
+      this.store.discard(f.id);
+      this.deleted.set(!f.published);
+      this.step.set(0);
+      this.store.notice.set("Draft deleted.");
     }
   }
 }
