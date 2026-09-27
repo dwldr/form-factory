@@ -16,14 +16,6 @@ import {
 } from "@angular/router";
 import { Store, readPreference } from "./store";
 
-function showDemoBanner(): boolean {
-  try {
-    return sessionStorage.getItem("ff-banner") !== "hidden";
-  } catch {
-    return true;
-  }
-}
-
 @Component({
   selector: "app-root",
   host: { "(keydown)": "handleKey($event)" },
@@ -66,24 +58,24 @@ function showDemoBanner(): boolean {
         [class.mobile-open]="menu()"
         [class.sidebar-collapsed]="collapsed()"
         [style.--banner-height]="bannerHeight() + 'px'"
+        [attr.role]="menu() ? 'dialog' : null"
+        [attr.aria-modal]="menu() ? true : null"
+        [attr.aria-label]="menu() ? 'Navigation' : null"
       >
-        <aside
-          class="sidebar"
-          id="sidebar"
-          [attr.role]="menu() ? 'dialog' : null"
-          [attr.aria-modal]="menu() ? true : null"
-          [attr.aria-label]="menu() ? 'Navigation' : null"
+        <button
+          id="close-navigation"
+          class="mobile-navigation-toggle icon-button"
+          [class.is-open]="menu()"
+          [attr.aria-label]="menu() ? 'Close navigation' : 'Open navigation'"
+          [attr.aria-expanded]="menu()"
+          aria-controls="sidebar"
+          (click)="menu() ? closeMenu() : openMenu()"
         >
-          @if (menu()) {
-            <button
-              id="close-navigation"
-              class="close-navigation icon-button"
-              aria-label="Close navigation"
-              (click)="closeMenu()"
-            >
-              ×
-            </button>
-          }
+          <span class="menu-lines" aria-hidden="true"
+            ><span></span><span></span><span></span
+          ></span>
+        </button>
+        <aside class="sidebar" id="sidebar">
           <a routerLink="/" class="brand" aria-label="Form Factory home">
             @if (collapsed() && !menu()) {
               <img
@@ -179,7 +171,7 @@ function showDemoBanner(): boolean {
                 store.user() === "derek"
                   ? "DW"
                   : store.user() === "alex"
-                    ? "AM"
+                    ? "RC"
                     : "?"
               }}</span
               ><span class="user-details"
@@ -203,15 +195,7 @@ function showDemoBanner(): boolean {
         <div class="workspace" [inert]="menu()">
           @if (!editing()) {
             <header class="topbar">
-              <button
-                class="mobile-toggle icon-button"
-                aria-label="Toggle navigation"
-                [attr.aria-expanded]="menu()"
-                (click)="openMenu()"
-                aria-controls="sidebar"
-              >
-                ☰
-              </button>
+              <span class="mobile-menu-space" aria-hidden="true"></span>
               @if (showSearch()) {
                 <label class="search"
                   ><ff-icon name="search" /><input
@@ -248,7 +232,7 @@ export class App {
   audit = isDevMode() && new URLSearchParams(location.search).has("audit");
   store = inject(Store);
   router = inject(Router);
-  banner = signal(showDemoBanner());
+  banner = signal(true);
   ui = inject(ChromeState);
   dark = this.ui.dark;
   menu = this.ui.menu;
@@ -268,14 +252,14 @@ export class App {
     this.store.user() === "derek"
       ? "Derek Wilder"
       : this.store.user() === "alex"
-        ? "Alex Morgan"
+        ? "Rickety Cricket"
         : "Signed out",
   );
   accountEmail = computed(() =>
     this.store.user() === "derek"
       ? "derek@example.com"
       : this.store.user() === "alex"
-        ? "alex@example.com"
+        ? "cricket@example.com"
         : "Choose an account",
   );
   profile = signal(false);
@@ -333,7 +317,7 @@ export class App {
   closeMenu() {
     this.menu.set(false);
     requestAnimationFrame(() =>
-      document.querySelector<HTMLButtonElement>(".mobile-toggle")?.focus(),
+      document.getElementById("close-navigation")?.focus(),
     );
   }
   handleKey(event: KeyboardEvent) {
@@ -345,7 +329,7 @@ export class App {
     if (!this.menu() || event.key !== "Tab") return;
     const items = Array.from(
       document.querySelectorAll<HTMLElement>(
-        "#sidebar a[href],#sidebar button:not([disabled])",
+        "#close-navigation,#sidebar a[href],#sidebar button:not([disabled])",
       ),
     );
     const first = items[0],
@@ -366,9 +350,6 @@ export class App {
   }
   dismiss() {
     this.banner.set(false);
-    try {
-      sessionStorage.setItem("ff-banner", "hidden");
-    } catch {}
   }
   reset() {
     if (

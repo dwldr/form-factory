@@ -44,7 +44,11 @@ import { Store } from "./store";
       @if (home) {
         <div class="stats-grid">
           @for (stat of stats(); track stat.label) {
-            <div class="stat-card">
+            <a
+              class="stat-card"
+              [routerLink]="stat.path"
+              [queryParams]="stat.query"
+            >
               <span
                 class="stat-icon"
                 [style.color]="stat.color"
@@ -52,7 +56,7 @@ import { Store } from "./store";
                 ><ff-icon [name]="stat.icon" /></span
               ><strong>{{ stat.value | number }}</strong>
               <p>{{ stat.label }}</p>
-            </div>
+            </a>
           }
         </div>
       }
@@ -246,7 +250,10 @@ export class Dashboard {
     source: () => this.url(),
     computation: (): string[] => [],
   });
-  status = signal("");
+  status = linkedSignal(() => {
+    const value = this.router.parseUrl(this.url()).queryParams["status"];
+    return value === "Published" || value === "Draft" ? value : "";
+  });
   filtered = computed(() =>
     this.store
       .forms()
@@ -271,24 +278,32 @@ export class Dashboard {
   stats = computed(() => [
     {
       label: "Total Forms",
+      path: "/forms",
+      query: {},
       value: this.store.own().length,
       icon: "forms",
       color: "#52627a",
     },
     {
       label: "Total Responses",
+      path: "/insights",
+      query: {},
       value: this.store.own().reduce((sum, f) => sum + f.responses, 0),
       icon: "users",
       color: "#078c4c",
     },
     {
       label: "Published Forms",
+      path: "/forms",
+      query: { status: "Published" },
       value: this.store.own().filter((f) => f.status === "Published").length,
       icon: "chart",
       color: "#cd4b24",
     },
     {
       label: "Shared with You",
+      path: "/shared",
+      query: {},
       value: this.store.forms().filter((f) => f.shared).length,
       icon: "link",
       color: "#365ee8",

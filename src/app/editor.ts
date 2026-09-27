@@ -17,13 +17,7 @@ import { Icon } from "./icon";
     @if (form(); as f) {
       <h1 class="sr-only">Edit {{ f.name }}</h1>
       <div class="editor-toolbar">
-        <button
-          class="mobile-toggle icon-button"
-          aria-label="Toggle navigation"
-          (click)="ui.openMenu()"
-        >
-          ☰
-        </button>
+        <span class="mobile-menu-space" aria-hidden="true"></span>
         <nav aria-label="Breadcrumb">
           <a routerLink="/forms">My Forms</a><span> / </span>{{ f.name }}
         </nav>
@@ -73,7 +67,7 @@ import { Icon } from "./icon";
               type="checkbox"
               [checked]="f.allowedUsers?.includes('alex')"
               (change)="allowAlex($event)"
-            />Allow Alex Morgan</label
+            />Allow Rickety Cricket</label
           >
         }
         @if (store.hasDraft(f)) {

@@ -39,6 +39,20 @@ body {
   color: var(--ink);
   background: var(--surface);
 }
+html,
+body {
+  overflow-x: clip;
+}
+app-root,
+.workspace,
+#main,
+.page {
+  min-width: 0;
+  max-width: 100%;
+}
+app-root {
+  display: block;
+}
 button,
 input,
 select,
@@ -175,6 +189,12 @@ legend {
   font-weight: 650;
   text-decoration: underline;
   min-height: 28px;
+}
+.demo-banner button[aria-label="Dismiss demo banner"] {
+  font-size: 20px;
+  min-width: 32px;
+  min-height: 32px;
+  text-decoration: none;
 }
 .dark .demo-banner,
 .dark .preview-banner {
@@ -426,6 +446,10 @@ nav a:hover {
   position: relative;
   background: var(--surface);
 }
+a.stat-card:hover {
+  border-color: var(--muted);
+  background: var(--subtle);
+}
 .stat-card strong {
   font-size: 28px;
   font-weight: 700;
@@ -456,6 +480,8 @@ nav a:hover {
   margin-left: 8px;
 }
 .table-wrap {
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: auto;
@@ -1987,5 +2013,90 @@ select {
   }
   .sidebar-collapsed:not(.mobile-open) .sidebar {
     display: none;
+  }
+}
+/* One persistent mobile toggle animates between menu and close states. */
+.mobile-navigation-toggle,
+.mobile-menu-space {
+  display: none;
+}
+.menu-lines {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 16px;
+}
+.menu-lines span {
+  position: absolute;
+  left: 0;
+  width: 20px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
+}
+.menu-lines span:nth-child(1) {
+  top: 0;
+}
+.menu-lines span:nth-child(2) {
+  top: 7px;
+}
+.menu-lines span:nth-child(3) {
+  top: 14px;
+}
+.is-open .menu-lines span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.is-open .menu-lines span:nth-child(2) {
+  opacity: 0;
+}
+.is-open .menu-lines span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu-lines span {
+    transition: none;
+  }
+}
+@media (max-width: 600px) {
+  .app-shell {
+    position: relative;
+  }
+  .mobile-menu-space {
+    display: block;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+  .mobile-navigation-toggle {
+    display: inline-flex;
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    z-index: 45;
+    background: var(--surface);
+  }
+  .mobile-navigation-toggle.is-open {
+    position: fixed;
+    top: 14px;
+  }
+  .page-heading > *,
+  .section-heading > *,
+  .home-footer > * {
+    min-width: 0;
+  }
+  .section-heading,
+  .home-footer {
+    flex-wrap: wrap;
+  }
+  .page-heading,
+  .home-footer,
+  .member {
+    overflow-wrap: anywhere;
+  }
+  .notification {
+    width: min(280px, calc(100vw - 32px));
   }
 }

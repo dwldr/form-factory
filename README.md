@@ -25,9 +25,9 @@ Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwar
 
 ## Demo boundaries
 
-Forms and responses are stored in this browser's localStorage and synchronize between same-origin tabs through storage events. There is no data server, real authentication, email delivery, or cross-browser sharing. Private-link checks demonstrate access control using the Derek/Alex/signed-out demo accounts; they are not server-enforced security. Copied links require the same browser data. File questions save filenames only; file contents are never uploaded. Signatures are typed demo responses. Shared forms and team members are sample records. Seeded historical response counts have no fabricated individual answers; newly submitted answers are stored and charted. Draft previews do not save responses.
+Forms and responses are stored in this browser's localStorage and synchronize between same-origin tabs through storage events. There is no data server, real authentication, email delivery, or cross-browser sharing. Private-link checks demonstrate access control using the Derek/Rickety Cricket/signed-out demo accounts; they are not server-enforced security. Copied links require the same browser data. File questions save filenames only; file contents are never uploaded. Signatures are typed demo responses. Shared forms and team members are sample records. Seeded historical response counts have no fabricated individual answers; newly submitted answers are stored and charted. Draft previews do not save responses.
 
-Resetting the demo replaces all local form records and responses with the initial sample set. Workspace name, contact email, theme, and banner dismissal are separate preferences. Storage failures are reported instead of silently claiming a successful save.
+Resetting the demo replaces all local form records and responses with the initial sample set. Workspace name, contact email, and theme are separate preferences. The demo banner reappears on every page load; dismissing it only hides it until the next reload. Storage failures are reported instead of silently claiming a successful save.
 
 ## Checks
 

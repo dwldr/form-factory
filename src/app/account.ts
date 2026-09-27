@@ -9,7 +9,7 @@ import { Store } from "./store";
       <button class="secondary" (click)="choose('derek')">
         Derek Wilder · Administrator</button
       ><button class="secondary" (click)="choose('alex')">
-        Alex Morgan · Viewer</button
+        Rickety Cricket · Viewer</button
       ><button class="secondary" (click)="choose('guest')">
         Continue signed out
       </button>

@@ -92,15 +92,15 @@ export class Team {
       role: "Admin",
     },
     {
-      initials: "JL",
-      name: "Jordan Lee",
-      email: "jordan@example.com",
+      initials: "KW",
+      name: "Kelvin Wilbraham",
+      email: "kelvin@example.com",
       role: "Editor",
     },
     {
-      initials: "AM",
-      name: "Alex Morgan",
-      email: "alex@example.com",
+      initials: "RC",
+      name: "Rickety Cricket",
+      email: "cricket@example.com",
       role: "Viewer",
     },
   ];
