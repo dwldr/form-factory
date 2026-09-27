@@ -67,11 +67,12 @@ import { Store, Field } from "./store";
               <span class="success-mark" aria-hidden="true">✓</span>
               <h1>Thank you!</h1>
               <p>
-                {{
-                  preview()
-                    ? "Your preview is complete. No response was saved."
-                    : "Your response has been recorded in this demo."
-                }}
+                @if (preview()) {
+                  Your preview is complete. No response was saved.
+                } @else {
+                  Your response has been recorded in this demo.<br />
+                  You may now close this browser tab or window.
+                }
               </p>
               <button class="primary" (click)="restart()">
                 Submit another response
