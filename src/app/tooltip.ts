@@ -33,6 +33,8 @@ export class Tooltip implements OnDestroy {
     const tip = this.renderer.createElement("div") as HTMLElement;
     tip.id = "ff-tooltip-" + ++tooltipId;
     tip.className = "floating-tooltip";
+    if (this.ffTooltipPosition() === "right")
+      tip.classList.add("sidebar-tooltip");
     tip.setAttribute("role", "tooltip");
     tip.textContent = text;
     document.body.appendChild(tip);

@@ -24,9 +24,6 @@ import { Store, Field } from "./store";
               saved.</span
             >
             <div class="flex items-center gap-3">
-              @if (store.hasDraft(record()!)) {
-                <button (click)="discard()">Delete draft</button>
-              }
               <button
                 aria-label="Dismiss preview banner"
                 (click)="previewDismissed.set(true)"

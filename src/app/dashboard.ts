@@ -101,8 +101,12 @@ import { Store } from "./store";
               <th scope="col">Status</th>
               <th scope="col">Responses</th>
               <th scope="col">Last Modified</th>
-              <th scope="col">Link</th>
-              <th scope="col"><span class="sr-only">Actions</span></th>
+              <th scope="col" class="form-link-cell">
+                <span class="sr-only">Link</span>
+              </th>
+              <th scope="col" class="form-actions-cell">
+                <span class="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -142,7 +146,7 @@ import { Store } from "./store";
                 <td class="muted nowrap">
                   {{ f.modified | date: "MMM d, y" : "UTC" }}
                 </td>
-                <td>
+                <td class="form-link-cell">
                   @if (store.publicUrl(f); as url) {
                     <button
                       class="icon-button url-tooltip"
@@ -164,7 +168,7 @@ import { Store } from "./store";
                     <span class="muted" aria-label="No published link">—</span>
                   }
                 </td>
-                <td>
+                <td class="form-actions-cell">
                   <div class="row-actions">
                     <a
                       class="icon-button"
@@ -185,7 +189,7 @@ import { Store } from "./store";
                     >
                     @if (!shared) {
                       <button
-                        class="icon-button"
+                        class="icon-button delete-form"
                         [attr.aria-label]="'Delete ' + f.name"
                         (click)="remove(f.id, f.name)"
                       >

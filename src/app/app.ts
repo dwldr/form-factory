@@ -15,6 +15,15 @@ import {
   RouterOutlet,
 } from "@angular/router";
 import { Store, readPreference } from "./store";
+
+function showDemoBanner(): boolean {
+  try {
+    return sessionStorage.getItem("ff-banner") !== "hidden";
+  } catch {
+    return true;
+  }
+}
+
 @Component({
   selector: "app-root",
   host: { "(keydown)": "handleKey($event)" },
@@ -234,7 +243,7 @@ export class App {
   audit = isDevMode() && new URLSearchParams(location.search).has("audit");
   store = inject(Store);
   router = inject(Router);
-  banner = signal(readPreference("ff-banner") !== "hidden");
+  banner = signal(showDemoBanner());
   ui = inject(ChromeState);
   dark = this.ui.dark;
   menu = this.ui.menu;
@@ -343,7 +352,7 @@ export class App {
   dismiss() {
     this.banner.set(false);
     try {
-      localStorage.setItem("ff-banner", "hidden");
+      sessionStorage.setItem("ff-banner", "hidden");
     } catch {}
   }
   reset() {

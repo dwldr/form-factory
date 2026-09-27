@@ -12,7 +12,7 @@ import { Store, newField, Field } from "./store";
     <div class="template-grid">
       @for (t of templates; track t.name) {
         <article class="template-card">
-          <div class="template-art" [style.background]="t.color">
+          <div class="template-art" [style.--template-color]="t.color">
             <span aria-hidden="true">{{ t.icon }}</span>
           </div>
           <div class="template-body">

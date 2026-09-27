@@ -31,7 +31,7 @@ import { Icon } from "./icon";
           <ff-header-actions />
           <span class="saved">{{
             store.persisted()
-              ? "Saved locally"
+              ? "Saved"
               : "Not saved · storage unavailable"
           }}</span
           ><a
@@ -53,11 +53,13 @@ import { Icon } from "./icon";
         </div>
       </div>
       <div class="draft-toolbar">
-        <span role="status">{{
-          store.hasDraft(f)
-            ? "Unpublished draft · changes are not live"
-            : "Published version is up to date"
-        }}</span
+        <span role="status">
+          @if (store.hasDraft(f)) {
+            <strong>Unpublished draft</strong> · changes are not live
+          } @else {
+            Published version is up to date
+          }
+        </span
         ><label class="visibility-control"
           >Access<select
             aria-label="Form access"
@@ -317,7 +319,7 @@ import { Icon } from "./icon";
                 </select></label
               >
             }
-            <p class="helper">Changes save automatically in this browser.</p>
+            <p class="helper">Changes save automatically.</p>
           } @else {
             <h2>Add field</h2>
             <label class="sr-only" for="field-search">Search field types</label>
