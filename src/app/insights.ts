@@ -34,7 +34,7 @@ import { Icon } from "./icon";
           ><ff-icon name="chart"
         /></span>
         <strong>{{ entries().length }}</strong>
-        <p>New demo submissions</p>
+        <p>Demo responses</p>
       </a>
       <a class="stat-card" routerLink="/forms">
         <span class="stat-icon" aria-hidden="true"
@@ -59,7 +59,8 @@ import { Icon } from "./icon";
       <section class="panel">
         <h2>Responses by form</h2>
         <p class="helper">
-          Includes seeded historical totals and new demo submissions.
+          Includes fictional sample responses and submissions saved in this
+          browser.
         </p>
         <div class="bar-chart">
           @for (f of forms(); track f.id) {
@@ -91,15 +92,17 @@ import { Icon } from "./icon";
           ><span class="muted">○ Draft {{ forms().length - published() }}</span>
         </div>
         <p class="helper mt-6">
-          Historical sample data includes response totals only. Individual
-          answers appear below as you submit forms in the demo.
+          Older demo data may include totals without individual answers.
+          Available answers appear below and in My Responses.
         </p>
       </section>
     </div>
     @if (selected()) {
       <section class="panel mt-6">
         <h2>Answer distribution</h2>
-        <p class="helper">Based on new demo submissions for this form.</p>
+        <p class="helper">
+          Based on saved sample and demo responses for this form.
+        </p>
         @for (question of breakdowns(); track question.id) {
           <h3 class="mt-6 mb-3">{{ question.label }}</h3>
           @for (option of question.options; track $index) {
@@ -150,7 +153,7 @@ import { Icon } from "./icon";
         </details>
       } @empty {
         <div class="empty">
-          <h3>No new responses yet</h3>
+          <h3>No responses yet</h3>
           <p>
             Open a published form and submit a response to see its answers here.
           </p>

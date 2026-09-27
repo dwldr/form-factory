@@ -53,3 +53,10 @@ Sharing is browser-local; there is no real server or account system. Historical 
 - Checked editor and Insights at a 390px viewport without horizontal overflow. Restored the original light theme and removed the temporary form and response after testing.
 - Banner images are stored as local data URLs; respondent file questions still retain filenames only. Historical seeded response totals do not represent individual response records.
 - The development launcher now listens only on localhost and the specified Ethernet address, superseding the earlier wildcard-binding check above.
+
+## Sample-data refresh — September 27, 2026
+
+- Fresh/reset demos include 12 purpose-specific forms and 22 fictional responses; each total matches its saved answers. Existing browser data is preserved.
+- Sample forms cover conditional visibility/requirements, two-page registration, choices, ratings, draft-only forms, and private shared forms. No banner is included by default.
+- Two additional automated checks validate totals, answer labels, option values, earlier-field rule references, unique response IDs, relative timestamps, and independent reset objects. All 20 tests pass.
+- Updated Insights and My Responses descriptions to account for both sample answers and new submissions, while explaining older totals-only data.

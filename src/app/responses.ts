@@ -45,8 +45,8 @@ import { Store } from "./store";
         <div>
           <h1>My Responses</h1>
           <p>
-            Individual responses submitted in this demo. Historical sample
-            totals do not contain individual answers.
+            Fictional sample answers and responses submitted in this demo. Older
+            sample totals do not contain individual answers.
           </p>
         </div>
         <span class="muted">{{ filtered().length }} responses</span>

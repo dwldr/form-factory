@@ -1,3 +1,4 @@
+import { seedForms as seed } from "./sample-data";
 import { copyText } from "./clipboard";
 import {
   NotificationRecord,
@@ -99,62 +100,6 @@ export function newField(type: FieldType, label = "Untitled question"): Field {
     required: false,
     options: ["Option 1", "Option 2"],
   };
-}
-function seed(): FormRecord[] {
-  const names = [
-    "Customer Feedback",
-    "Event Registration",
-    "Job Application",
-    "Newsletter Signup",
-    "Product Research Survey",
-    "Employee Onboarding",
-    "Website Feedback",
-    "Workshop Registration",
-    "Contact Us",
-    "Volunteer Application",
-    "Team Satisfaction",
-    "Design Review",
-  ];
-  return names.map((name, i) => ({
-    id: `form-${i + 1}`,
-    name,
-    description:
-      i === 0
-        ? "We’d love to hear your thoughts. Your feedback helps us improve."
-        : `Thank you for completing our ${name.toLowerCase()} form.`,
-    status: i === 2 || i === 5 || i === 9 ? "Draft" : "Published",
-    responses: [892, 1200, 0, 456, 734, 0, 64, 38, 21, 0, 48, 16][i],
-    modified: `2026-09-${String(20 - i).padStart(2, "0")}`,
-    shared: i >= 10,
-    fields:
-      i === 0
-        ? [
-            {
-              ...newField(
-                "Multiple choice",
-                "What is your overall experience?",
-              ),
-              description: "Select one option",
-              options: ["Excellent", "Good", "Average", "Poor"],
-              required: true,
-            },
-            newField("Paragraph", "What did you like most?"),
-            {
-              ...newField(
-                "Multiple choice",
-                "Would you recommend us to a friend?",
-              ),
-              description: "Select one option",
-              options: ["Yes", "Maybe", "No"],
-            },
-          ]
-        : [
-            newField("Text input", "Your name"),
-            { ...newField("Email", "Email address"), required: true },
-            newField("Paragraph", "Anything else you’d like to share?"),
-          ],
-    entries: [],
-  }));
 }
 export function readPreference(key: string): string | null {
   try {
