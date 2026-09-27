@@ -614,6 +614,55 @@ th input {
   left: auto;
   right: 0;
   width: 270px;
+  max-height: min(420px, calc(100dvh - 160px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.notification-bell {
+  position: relative;
+}
+.notification-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #dc2626;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+.notification-list li {
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  overflow-wrap: anywhere;
+}
+.notification-list li:last-child {
+  border-bottom: 0;
+}
+.notification-list .notification-new {
+  background: var(--active);
+  border-left-color: var(--yellow);
+}
+.notification-list p {
+  color: var(--ink);
+  margin: 4px 0 8px;
+}
+.notification-list time {
+  font-size: 11px;
+  color: var(--muted);
+}
+.notification-new-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .toast {
   position: fixed;

@@ -475,7 +475,7 @@ export class Viewer {
       this.store.discard(f.id);
       this.deleted.set(!f.published);
       this.step.set(0);
-      this.store.notice.set("Draft deleted.");
+      this.store.notify("Draft deleted.");
     }
   }
 }

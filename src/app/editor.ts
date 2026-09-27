@@ -666,7 +666,7 @@ export class Editor {
       this.store.discard(f.id);
       this.selected.set(null);
       if (!f.published) void this.router.navigate(["/forms"]);
-      this.store.notice.set("Draft deleted.");
+      this.store.notify("Draft deleted.");
     }
   }
   publish() {
@@ -681,13 +681,13 @@ export class Editor {
           (this.hasOptions(field) && field.options.some((o) => !o.trim())),
       )
     ) {
-      this.store.notice.set(
+      this.store.notify(
         "Add a form title, at least one question, and non-empty labels and options before publishing.",
       );
       return;
     }
     this.store.publish(this.id);
-    this.store.notice.set(
+    this.store.notify(
       "Published successfully. The form link now shows this version.",
     );
   }

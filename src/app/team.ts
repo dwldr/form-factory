@@ -110,9 +110,9 @@ export class Team {
     try {
       localStorage.setItem("ff-team-name", this.model().name);
       localStorage.setItem("ff-team-email", this.model().email);
-      this.store.notice.set("Workspace settings saved.");
+      this.store.notify("Workspace settings saved.");
     } catch {
-      this.store.notice.set("Unable to save settings in this browser.");
+      this.store.notify("Unable to save settings in this browser.");
     }
   }
 }

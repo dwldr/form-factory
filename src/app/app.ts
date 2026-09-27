@@ -18,7 +18,10 @@ import { Store, readPreference } from "./store";
 
 @Component({
   selector: "app-root",
-  host: { "(keydown)": "handleKey($event)" },
+  host: {
+    "(keydown)": "handleKey($event)",
+    "(document:click)": "closeOutsideMenus($event)",
+  },
   imports: [
     Tooltip,
     AccessibilityAudit,
@@ -219,10 +222,7 @@ import { Store, readPreference } from "./store";
     }
     <div class="toast" role="status" [class.hidden]="!store.notice()">
       {{ store.notice()
-      }}<button
-        aria-label="Dismiss notification"
-        (click)="store.notice.set('')"
-      >
+      }}<button aria-label="Dismiss notification" (click)="store.notify('')">
         ✕
       </button>
     </div>
@@ -341,6 +341,12 @@ export class App {
       event.preventDefault();
       first?.focus();
     }
+  }
+  closeOutsideMenus(event: MouseEvent) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    if (!target.closest(".user-area")) this.profile.set(false);
+    if (!target.closest(".notification-menu")) this.notifications.set(false);
   }
   toggleSidebar() {
     this.collapsed.update((value) => !value);

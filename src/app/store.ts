@@ -1,5 +1,10 @@
 import { copyText } from "./clipboard";
 import {
+  NotificationRecord,
+  addNotification,
+  openNotifications,
+} from "./notification-state";
+import {
   FormSnapshot,
   migrateForm,
   hasDraft,
@@ -275,7 +280,22 @@ function read(): FormRecord[] {
 export class Store {
   readonly forms = signal<FormRecord[]>(read());
   readonly query = signal("");
-  readonly notice = signal("");
+  private readonly toast = signal("");
+  readonly notice = this.toast.asReadonly();
+  readonly notificationHistory = signal<NotificationRecord[]>([]);
+  readonly hasUnreadNotifications = computed(() =>
+    this.notificationHistory().some((record) => !record.seen),
+  );
+  notify(message: string) {
+    this.toast.set(message);
+    if (message.trim())
+      this.notificationHistory.update((records) =>
+        addNotification(records, uniqueId(), message, new Date().toISOString()),
+      );
+  }
+  readNotifications() {
+    this.notificationHistory.update(openNotifications);
+  }
   readonly persisted = signal(true);
   readonly user = signal<string | null>(
     readPreference("ff-account") ?? "derek",
@@ -303,7 +323,7 @@ export class Store {
   async copyUrl(f: FormRecord) {
     const url = this.publicUrl(f);
     if (!url) return;
-    this.notice.set(
+    this.notify(
       (await copyText(url))
         ? "Form link copied."
         : "Copy this form link: " + url,
@@ -342,7 +362,7 @@ export class Store {
         this.persisted.set(true);
       } catch {
         this.persisted.set(false);
-        this.notice.set(
+        this.notify(
           "Storage is unavailable or full. Changes only last for this session.",
         );
       }
@@ -398,12 +418,12 @@ export class Store {
     if (!source || !this.canEdit(source)) return;
     const copy = duplicateForm(source, this.forms(), uniqueId);
     this.forms.update((forms) => [copy, ...forms]);
-    this.notice.set(`Created “${copy.name}”.`);
+    this.notify(`Created “${copy.name}”.`);
   }
   reset() {
     this.forms.set(seed().map(migrateForm));
     this.query.set("");
-    this.notice.set("Demo data has been reset.");
+    this.notify("Demo data has been reset.");
   }
   submit(id: string, answers: Record<string, string>) {
     const f = this.forms().find((f) => f.id === id);
