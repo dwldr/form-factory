@@ -51,7 +51,7 @@ function showDemoBanner(): boolean {
         <div class="demo-banner" role="region" aria-label="Demo information">
           <span
             ><strong>You’re exploring a demo.</strong> Changes are saved in this
-            browser only.</span
+            browser only. Some features may not work.</span
           >
           <div class="flex gap-4 items-center">
             <button (click)="reset()">Reset demo data</button
