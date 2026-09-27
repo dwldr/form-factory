@@ -23,6 +23,12 @@ Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwar
 - Sample team, editable workspace settings, Derek Wilder admin profile, light/dark themes, and a dismissible/resettable demo banner.
 - Lazy-loaded routes, strict TypeScript/template checking, Angular signals, Signal Forms for workspace settings, and Tailwind utilities plus shared component styles.
 
+## Form rules and duplication
+
+The editor opens on Form Settings. Add Field contains the field picker and individual question settings. Each question can have one conditional-display rule and one conditional-required rule based on an earlier question. Rules support matching an answer, not matching an answer, or checking whether it is answered. Comparisons ignore capitalization; checkbox answers match individual selected options. Hidden questions are excluded from submissions and validation. A deleted or reordered source makes its rule inactive until an earlier source is chosen again. Rules are saved in drafts and only become live when published.
+
+Duplicate Form creates an independent unpublished draft with fresh field identifiers, preserved settings and rules, and no responses. Names use “copy”, “copy 2”, and subsequent available numbers.
+
 ## Demo boundaries
 
 Forms and responses are stored in this browser's localStorage and synchronize between same-origin tabs through storage events. There is no data server, real authentication, email delivery, or cross-browser sharing. Private-link checks demonstrate access control using the Derek/Rickety Cricket/signed-out demo accounts; they are not server-enforced security. Copied links require the same browser data. File questions save filenames only; file contents are never uploaded. Signatures are typed demo responses. Shared forms and team members are sample records. Seeded historical response counts have no fabricated individual answers; newly submitted answers are stored and charted. Draft previews do not save responses.

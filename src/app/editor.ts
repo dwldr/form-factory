@@ -1,3 +1,4 @@
+import { FormSettings } from "./form-settings";
 import { ChromeState, HeaderActions } from "./chrome";
 import { moveField } from "./form-version";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -12,7 +13,7 @@ import { ActivatedRoute, RouterLink, Router } from "@angular/router";
 import { Store, Field, FieldType, newField } from "./store";
 import { Icon } from "./icon";
 @Component({
-  imports: [RouterLink, Icon, HeaderActions],
+  imports: [RouterLink, Icon, HeaderActions, FormSettings],
   template: `
     @if (form(); as f) {
       <h1 class="sr-only">Edit {{ f.name }}</h1>
@@ -235,124 +236,165 @@ import { Icon } from "./icon";
           </div>
         </section>
         <aside class="field-panel" aria-label="Field settings">
-          @if (active(); as field) {
-            <div class="panel-heading">
-              <h2>
-                <span class="field-heading-icon" aria-hidden="true">{{
-                  icons[field.type]
-                }}</span
-                >{{ field.type }}
-              </h2>
-              <button
-                class="icon-button"
-                id="field-settings-back"
-                aria-label="Back to field types"
-                (click)="showPicker()"
-              >
-                <ff-icon name="arrow-left" />
-              </button>
-            </div>
-            @if (field.type !== "Page break") {
-              <label
-                >Label<input
-                  id="field-label"
-                  [value]="field.label"
-                  (input)="change('label', $event)" /></label
-              ><label
-                >Description<textarea
-                  rows="2"
-                  [value]="field.description"
-                  (input)="change('description', $event)"
-                ></textarea>
-              </label>
-            }
-            @if (hasOptions(field)) {
-              <fieldset>
-                <legend>Options</legend>
-                @for (option of field.options; track $index; let i = $index) {
-                  <div class="option-row">
-                    <input
-                      [attr.aria-label]="'Option ' + (i + 1)"
-                      [value]="option"
-                      (input)="optionChange(i, $event)"
-                    /><button
-                      [disabled]="field.options.length < 2"
-                      [attr.aria-label]="'Remove option ' + (i + 1)"
-                      (click)="removeOption(i)"
-                    >
-                      ×
-                    </button>
-                  </div>
-                }
-                <button
-                  class="text-button"
-                  (click)="patch({ options: [...field.options, 'New option'] })"
-                >
-                  ＋ Add option
-                </button>
-              </fieldset>
-            }
-            @if (
-              !["Section", "Page break", "Hidden field"].includes(field.type)
-            ) {
-              <label class="switch-label"
-                ><input
-                  type="checkbox"
-                  [checked]="field.required"
-                  (change)="required($event)"
-                />Required</label
-              >
-            }
-            @if (field.type === "Hidden field") {
-              <label
-                >Hidden value<input
-                  [value]="field.defaultValue ?? ''"
-                  (input)="patch({ defaultValue: value($event) })"
-              /></label>
-            }
-            @if (hasOptions(field) && field.type !== "Checkboxes") {
-              <label
-                >Default value<select
-                  [value]="field.defaultValue ?? ''"
-                  (change)="patch({ defaultValue: value($event) })"
-                >
-                  <option value="">None</option>
-                  @for (option of field.options; track $index) {
-                    <option>{{ option }}</option>
-                  }
-                </select></label
-              >
-            }
-            <p class="helper">Changes save automatically.</p>
-          } @else {
-            <h2>Add field</h2>
-            <label class="sr-only" for="field-search">Search field types</label>
-            <div class="search field-search">
-              <ff-icon name="search" />
-              <input
-                id="field-search"
-                placeholder="Search fields…"
-                [value]="fieldQuery()"
-                (input)="fieldQuery.set(value($event))"
+          <div class="settings-tabs" role="tablist" aria-label="Form tools">
+            <button
+              id="settings-tab"
+              role="tab"
+              [attr.aria-selected]="panelTab() === 'settings'"
+              [attr.tabindex]="panelTab() === 'settings' ? 0 : -1"
+              aria-controls="settings-panel"
+              (click)="setPanelTab('settings')"
+              (keydown)="tabKey($event, 'settings')"
+            >
+              Form Settings
+            </button>
+            <button
+              id="add-tab"
+              role="tab"
+              [attr.aria-selected]="panelTab() === 'add'"
+              [attr.tabindex]="panelTab() === 'add' ? 0 : -1"
+              aria-controls="add-panel"
+              (click)="setPanelTab('add')"
+              (keydown)="tabKey($event, 'add')"
+            >
+              Add Field
+            </button>
+          </div>
+          @if (panelTab() === "settings") {
+            <div
+              id="settings-panel"
+              role="tabpanel"
+              aria-labelledby="settings-tab"
+            >
+              <ff-form-settings
+                [fields]="f.fields"
+                (fieldsChange)="store.update(id, { fields: $event })"
               />
             </div>
-
-            <div class="field-types">
-              @for (type of filteredTypes(); track type; let i = $index) {
-                @if (i === 0 || (!fieldQuery() && i === 10)) {
-                  <p class="nav-caption field-group">
-                    {{ i === 0 ? "BASIC" : "ADVANCED" }}
-                  </p>
+          } @else {
+            <div id="add-panel" role="tabpanel" aria-labelledby="add-tab">
+              @if (active(); as field) {
+                <div class="panel-heading">
+                  <h2>
+                    <span class="field-heading-icon" aria-hidden="true">{{
+                      icons[field.type]
+                    }}</span
+                    >{{ field.type }}
+                  </h2>
+                </div>
+                @if (field.type !== "Page break") {
+                  <label
+                    >Label<input
+                      id="field-label"
+                      [value]="field.label"
+                      (input)="change('label', $event)" /></label
+                  ><label
+                    >Description<textarea
+                      rows="2"
+                      [value]="field.description"
+                      (input)="change('description', $event)"
+                    ></textarea>
+                  </label>
                 }
-                <button (click)="add(type)">
-                  <span aria-hidden="true">{{ icons[type] }}</span
-                  >{{ type }}
-                </button>
-              } @empty {
-                <p>No matching field types.</p>
+                @if (hasOptions(field)) {
+                  <fieldset>
+                    <legend>Options</legend>
+                    @for (
+                      option of field.options;
+                      track $index;
+                      let i = $index
+                    ) {
+                      <div class="option-row">
+                        <input
+                          [attr.aria-label]="'Option ' + (i + 1)"
+                          [value]="option"
+                          (input)="optionChange(i, $event)"
+                        /><button
+                          [disabled]="field.options.length < 2"
+                          [attr.aria-label]="'Remove option ' + (i + 1)"
+                          (click)="removeOption(i)"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    }
+                    <button
+                      class="text-button"
+                      (click)="
+                        patch({ options: [...field.options, 'New option'] })
+                      "
+                    >
+                      ＋ Add option
+                    </button>
+                  </fieldset>
+                }
+                @if (
+                  !["Section", "Page break", "Hidden field"].includes(
+                    field.type
+                  )
+                ) {
+                  <label class="switch-label"
+                    ><input
+                      type="checkbox"
+                      [checked]="field.required"
+                      (change)="required($event)"
+                    />Required</label
+                  >
+                }
+                @if (field.type === "Hidden field") {
+                  <label
+                    >Hidden value<input
+                      [value]="field.defaultValue ?? ''"
+                      (input)="patch({ defaultValue: value($event) })"
+                  /></label>
+                }
+                @if (hasOptions(field) && field.type !== "Checkboxes") {
+                  <label
+                    >Default value<select
+                      [value]="field.defaultValue ?? ''"
+                      (change)="patch({ defaultValue: value($event) })"
+                    >
+                      <option value="">None</option>
+                      @for (option of field.options; track $index) {
+                        <option>{{ option }}</option>
+                      }
+                    </select></label
+                  >
+                }
+                <p class="helper">Changes save automatically.</p>
+              } @else {
+                <h2 class="sr-only">Add field</h2>
+                <label class="sr-only" for="field-search"
+                  >Search field types</label
+                >
+                <div class="search field-search">
+                  <ff-icon name="search" />
+                  <input
+                    id="field-search"
+                    placeholder="Search fields…"
+                    [value]="fieldQuery()"
+                    (input)="fieldQuery.set(value($event))"
+                  />
+                </div>
+
+                <div class="field-types">
+                  @for (type of filteredTypes(); track type; let i = $index) {
+                    @if (i === 0 || (!fieldQuery() && i === 10)) {
+                      <p class="nav-caption field-group">
+                        {{ i === 0 ? "BASIC" : "ADVANCED" }}
+                      </p>
+                    }
+                    <button (click)="add(type)">
+                      <span aria-hidden="true">{{ icons[type] }}</span
+                      >{{ type }}
+                    </button>
+                  } @empty {
+                    <p class="no-field-results">No matching field types.</p>
+                  }
+                </div>
+                <p class="helper">Choose a field to add it to your form.</p>
               }
             </div>
-            <p class="helper">Choose a field to add it to your form.</p>
           }
         </aside>
       </div>
@@ -379,6 +421,10 @@ export class Editor {
   form = computed(() =>
     this.store.forms().find((f) => f.id === this.id && this.store.canEdit(f)),
   );
+  panelTab = linkedSignal({
+    source: () => this.id,
+    computation: (): "settings" | "add" => "settings",
+  });
   selected = linkedSignal({
     source: () => this.id,
     computation: (): string | null => null,
@@ -433,15 +479,37 @@ export class Editor {
     ),
   );
   selectField(id: string) {
+    this.panelTab.set("add");
     this.selected.set(id);
     requestAnimationFrame(() =>
       (
         document.getElementById("field-label") ??
-        document.getElementById("field-settings-back")
+        document.getElementById("add-tab")
       )?.focus(),
     );
   }
+  setPanelTab(tab: "settings" | "add") {
+    this.panelTab.set(tab);
+    this.selected.set(null);
+  }
+  tabKey(event: KeyboardEvent, tab: "settings" | "add") {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next =
+      event.key === "Home"
+        ? "settings"
+        : event.key === "End"
+          ? "add"
+          : tab === "settings"
+            ? "add"
+            : "settings";
+    this.setPanelTab(next);
+    document
+      .getElementById(next === "settings" ? "settings-tab" : "add-tab")
+      ?.focus();
+  }
   showPicker() {
+    this.panelTab.set("add");
     this.selected.set(null);
     requestAnimationFrame(() =>
       document.getElementById("field-search")?.focus(),

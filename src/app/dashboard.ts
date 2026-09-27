@@ -151,6 +151,16 @@ import { Store } from "./store";
                   {{ f.modified | date: "MMM d, y" : "UTC" }}
                 </td>
                 <td class="form-link-cell">
+                  @if (!shared) {
+                    <button
+                      class="icon-button"
+                      ffTooltip="Duplicate Form"
+                      [attr.aria-label]="'Duplicate Form: ' + f.name"
+                      (click)="store.duplicate(f.id)"
+                    >
+                      <ff-icon name="copy" />
+                    </button>
+                  }
                   @if (store.publicUrl(f); as url) {
                     <button
                       class="icon-button url-tooltip"

@@ -1,7 +1,7 @@
 import { Tooltip } from "./tooltip";
 import { ChromeState } from "./chrome";
 import { Icon } from "./icon";
-import { formPages } from "./form-version";
+import { fieldStates, Answers, formPages } from "./form-version";
 import { toSignal } from "@angular/core/rxjs-interop";
 import {
   Component,
@@ -86,7 +86,11 @@ import { Store, Field } from "./store";
                 Page {{ step() + 1 }} of {{ pages().length }}
               </p>
             }
-            <form (submit)="submit($event)">
+            <form
+              (submit)="submit($event)"
+              (input)="captureAnswers($event)"
+              (change)="captureAnswers($event)"
+            >
               @for (
                 pageFields of pages();
                 track $index;
@@ -104,10 +108,14 @@ import { Store, Field } from "./store";
                       <h2 class="mb-3">{{ field.label }}</h2>
                       <p class="helper">{{ field.description }}</p>
                     } @else {
-                      <fieldset class="response-field">
+                      <fieldset
+                        class="response-field"
+                        [hidden]="!states()[field.id]?.visible"
+                        [disabled]="!states()[field.id]?.visible"
+                      >
                         <legend>
                           {{ field.label }}
-                          @if (field.required) {
+                          @if (states()[field.id]?.required) {
                             <span aria-hidden="true"> *</span
                             ><span class="sr-only"> (required)</span>
                           }
@@ -124,7 +132,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                               autocomplete="street-address"
                             ></textarea>
@@ -142,7 +151,8 @@ import { Store, Field } from "./store";
                                 [name]="field.id"
                                 [attr.aria-label]="field.label"
                                 [required]="
-                                  field.required && step() === pageIndex
+                                  states()[field.id]?.required &&
+                                  step() === pageIndex
                                 "
                                 (change)="fileSelected(field.id, $event)"
                               /><span>{{
@@ -159,7 +169,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                             >
                               <option value="">Choose a score</option>
@@ -176,7 +187,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                               placeholder="Type your full name"
                             />
@@ -188,7 +200,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                               [attr.aria-describedby]="
                                 field.description ? field.id + '-help' : null
@@ -204,7 +217,8 @@ import { Store, Field } from "./store";
                                   [value]="option"
                                   [checked]="field.defaultValue === option"
                                   [required]="
-                                    field.required && step() === pageIndex
+                                    states()[field.id]?.required &&
+                                    step() === pageIndex
                                   "
                                 />{{ option }}</label
                               >
@@ -226,7 +240,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                             >
                               <option value="">Choose an option</option>
@@ -244,7 +259,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                             >
                               <option value="">Choose a rating</option>
@@ -262,7 +278,8 @@ import { Store, Field } from "./store";
                               [name]="field.id"
                               [attr.aria-label]="field.label"
                               [required]="
-                                field.required && step() === pageIndex
+                                states()[field.id]?.required &&
+                                step() === pageIndex
                               "
                               [attr.aria-describedby]="
                                 field.description ? field.id + '-help' : null
@@ -360,6 +377,23 @@ export class Viewer {
   submitted = linkedSignal({ source: () => this.id, computation: () => false });
   step = linkedSignal({ source: () => this.id, computation: () => 0 });
   pages = computed(() => formPages(this.form()?.fields ?? []));
+  answers = linkedSignal({
+    source: () => this.id,
+    computation: (): Answers => ({}),
+  });
+  states = computed(() =>
+    fieldStates(this.form()?.fields ?? [], this.answers()),
+  );
+  captureAnswers(event: Event) {
+    const form = event.currentTarget as HTMLFormElement;
+    const data = new FormData(form);
+    const answers: Answers = {};
+    for (const field of this.form()?.fields ?? [])
+      answers[field.id] = data
+        .getAll(field.id)
+        .map((value) => (value instanceof File ? value.name : String(value)));
+    this.answers.set(answers);
+  }
   fileNames = signal<Record<string, string>>({});
   fileSelected(id: string, event: Event) {
     this.fileNames.update((names) => ({
@@ -368,6 +402,7 @@ export class Viewer {
     }));
   }
   restart() {
+    this.answers.set({});
     this.fileNames.set({});
     this.step.set(0);
     this.submitted.set(false);
@@ -395,14 +430,18 @@ export class Viewer {
     const data = new FormData(event.target as HTMLFormElement);
     const answers: Record<string, string> = {};
     for (const field of f.fields) {
-      if (["Section", "Page break"].includes(field.type)) continue;
+      if (
+        ["Section", "Page break"].includes(field.type) ||
+        !this.states()[field.id]?.visible
+      )
+        continue;
       answers[field.id] = data
         .getAll(field.id)
         .map((value) => (value instanceof File ? value.name : String(value)))
         .join(", ");
       if (
         this.pages()[this.step()].some((q) => q.id === field.id) &&
-        field.required &&
+        this.states()[field.id]?.required &&
         !answers[field.id].trim()
       ) {
         this.error.set("Please answer “" + field.label + "”.");

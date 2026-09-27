@@ -6,6 +6,7 @@ import {
   publishForm,
   discardDraft,
   canReadForm,
+  duplicateForm,
 } from "./form-version";
 import { Service, computed, effect, signal } from "@angular/core";
 export type FieldType =
@@ -28,6 +29,8 @@ export type FieldType =
   | "Page break"
   | "Hidden field";
 export interface Field {
+  visibleWhen?: FieldCondition;
+  requiredWhen?: FieldCondition;
   id: string;
   type: FieldType;
   label: string;
@@ -35,6 +38,11 @@ export interface Field {
   required: boolean;
   options: string[];
   defaultValue?: string;
+}
+export interface FieldCondition {
+  fieldId: string;
+  operator: "equals" | "notEquals" | "answered";
+  value: string;
 }
 export interface Entry {
   id: string;
@@ -181,6 +189,16 @@ function validField(value: unknown): value is Field {
     "Hidden field",
   ];
   return (
+    [value["visibleWhen"], value["requiredWhen"]].every(
+      (rule) =>
+        rule === undefined ||
+        (record(rule) &&
+          typeof rule["fieldId"] === "string" &&
+          ["equals", "notEquals", "answered"].includes(
+            String(rule["operator"]),
+          ) &&
+          typeof rule["value"] === "string"),
+    ) &&
     typeof value["id"] === "string" &&
     typeof value["type"] === "string" &&
     types.includes(value["type"]) &&
@@ -374,6 +392,13 @@ export class Store {
     this.forms.update((forms) =>
       forms.filter((f) => !ids.includes(f.id) || f.shared),
     );
+  }
+  duplicate(id: string) {
+    const source = this.forms().find((form) => form.id === id);
+    if (!source || !this.canEdit(source)) return;
+    const copy = duplicateForm(source, this.forms(), uniqueId);
+    this.forms.update((forms) => [copy, ...forms]);
+    this.notice.set(`Created “${copy.name}”.`);
   }
   reset() {
     this.forms.set(seed().map(migrateForm));
