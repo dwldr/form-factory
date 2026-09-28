@@ -44,10 +44,7 @@ import { Store } from "./store";
       <div class="page-heading">
         <div>
           <h1>My Responses</h1>
-          <p>
-            Fictional sample answers and responses submitted in this demo. Older
-            sample totals do not contain individual answers.
-          </p>
+          <p>View, search, and explore responses to your forms.</p>
         </div>
         <span class="muted">{{ filtered().length }} responses</span>
       </div>
