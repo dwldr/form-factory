@@ -525,7 +525,6 @@ import { Icon } from "./icon";
                     </select></label
                   >
                 }
-                <p class="helper">Changes save automatically.</p>
                 <button
                   class="text-button delete-question-setting"
                   aria-label="Delete this question"
@@ -576,6 +575,9 @@ import { Icon } from "./icon";
               }
             </div>
           }
+          <footer class="field-panel-footer">
+            <p class="helper">Changes save automatically.</p>
+          </footer>
         </aside>
       </div>
     } @else {

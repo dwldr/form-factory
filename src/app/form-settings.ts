@@ -62,10 +62,6 @@ import { Icon } from "./icon";
         >
       }
     </section>
-    <p class="helper">
-      Control when questions appear and when an answer is required. Changes save
-      automatically.
-    </p>
     @for (section of sections; track section.key) {
       <section class="rule-section" [attr.aria-label]="section.title">
         <h3>{{ section.title }}</h3>
