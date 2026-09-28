@@ -66,7 +66,7 @@ import { Store } from "./store";
         </h2>
         <div class="flex gap-3 items-center">
           @if (selected().length) {
-            <button class="danger" (click)="removeSelected()">
+            <button class="danger delete-action" (click)="removeSelected()">
               <ff-icon name="trash" />
               Delete selected ({{ selected().length }})
             </button>

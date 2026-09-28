@@ -2294,6 +2294,9 @@ select {
   border-radius: 8px;
   flex-wrap: wrap;
 }
+.question-delete-toolbar > .secondary {
+  margin-left: auto;
+}
 .delete-action {
   background: #b91c1c;
   color: #fff;
@@ -2371,6 +2374,9 @@ select {
 }
 .banner-settings {
   margin-bottom: 24px;
+}
+.banner-fit-option input[type="checkbox"] {
+  margin-right: 8px;
 }
 .banner-settings h3 {
   font-weight: 650;
@@ -2460,7 +2466,10 @@ select {
 }
 .required-field-message {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.5;
   margin: 12px 0 24px;
 }
 .required-message-bottom {

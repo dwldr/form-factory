@@ -77,3 +77,15 @@ test('presentation settings publish together and discard restores older absent v
  assert.equal(next.published.requiredMessage, '');
  assert.equal(next.published.requiredMessageLocation, 'Hidden');
 });
+
+test('required message alignment stays in drafts until published and restores on discard', () => {
+ const form = publishForm(make());
+ form.requiredMessageAlignment = 'Center';
+ assert.equal(form.published.requiredMessageAlignment, undefined);
+ assert.equal(discardDraft(form).requiredMessageAlignment, undefined);
+ const live = publishForm(form);
+ assert.equal(live.published.requiredMessageAlignment, 'Center');
+ live.requiredMessageAlignment = 'Right';
+ assert.equal(discardDraft(live).requiredMessageAlignment, 'Center');
+ assert.equal(publishForm(live).published.requiredMessageAlignment, 'Right');
+});

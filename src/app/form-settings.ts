@@ -19,12 +19,12 @@ import { Icon } from "./icon";
       @if (bannerFilename()) {
         <p class="helper banner-filename">{{ bannerFilename() }}</p>
       }
-      <label class="choice"
+      <label class="choice banner-fit-option"
         ><input
           type="checkbox"
           [checked]="bannerFit()"
           (change)="settingsChange.emit({ bannerFit: checked($event) })"
-        />Fit image to form page</label
+        />Fit image to form</label
       >
       <label
         >Required field message<input
@@ -39,6 +39,16 @@ import { Icon } from "./icon";
           <option>Top</option>
           <option>Bottom</option>
           <option>Hidden</option>
+        </select></label
+      >
+      <label
+        >Required message alignment<select
+          [value]="requiredMessageAlignment()"
+          (change)="setMessageAlignment($event)"
+        >
+          <option>Left</option>
+          <option>Center</option>
+          <option>Right</option>
         </select></label
       >
     </section>
@@ -150,6 +160,13 @@ export class FormSettings {
   bannerFilename = input<string>();
   bannerFit = input(false);
   requiredMessage = input("Required fields are marked with an *");
+  requiredMessageAlignment = input<"Left" | "Center" | "Right">("Left");
+  setMessageAlignment(event: Event) {
+    this.settingsChange.emit({
+      requiredMessageAlignment: this.value(event) as
+        "Left" | "Center" | "Right",
+    });
+  }
   requiredMessageLocation = input<"Top" | "Bottom" | "Hidden">("Top");
   bannerUpload = output<Event>();
   settingsChange = output<Partial<FormRecord>>();

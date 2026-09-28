@@ -29,15 +29,18 @@ import { Icon } from "./icon";
         <div class="flex gap-3 items-center editor-publish-actions">
           <span class="saved">{{
             store.persisted() ? "Saved" : "Not saved · storage unavailable"
-          }}</span
-          ><a
-            class="secondary"
-            [routerLink]="['/forms', f.id, 'preview']"
-            target="_blank"
-            rel="noopener"
-            aria-label="Preview (opens in a new tab)"
-            >Preview</a
-          ><button class="primary" (click)="publish()">
+          }}</span>
+          @if (store.hasDraft(f)) {
+            <a
+              class="secondary"
+              [routerLink]="['/forms', f.id, 'preview']"
+              target="_blank"
+              rel="noopener"
+              aria-label="Preview (opens in a new tab)"
+              >Preview</a
+            >
+          }
+          <button class="primary" (click)="publish()">
             {{
               f.published && !store.hasDraft(f)
                 ? "Published ✓"
@@ -185,7 +188,12 @@ import { Icon } from "./icon";
               (input)="updateForm('description', $event)"
             ></textarea>
             @if ((f.requiredMessageLocation ?? "Top") === "Top") {
-              <p class="required-field-message">
+              <p
+                class="required-field-message"
+                [style.text-align]="
+                  (f.requiredMessageAlignment ?? 'Left').toLowerCase()
+                "
+              >
                 {{
                   f.requiredMessage ?? "Required fields are marked with an *"
                 }}
@@ -351,7 +359,12 @@ import { Icon } from "./icon";
             </button>
           </div>
           @if (f.requiredMessageLocation === "Bottom") {
-            <p class="required-field-message required-message-bottom">
+            <p
+              class="required-field-message required-message-bottom"
+              [style.text-align]="
+                (f.requiredMessageAlignment ?? 'Left').toLowerCase()
+              "
+            >
               {{ f.requiredMessage ?? "Required fields are marked with an *" }}
             </p>
           }
@@ -395,6 +408,9 @@ import { Icon } from "./icon";
                   f.requiredMessage ?? 'Required fields are marked with an *'
                 "
                 [requiredMessageLocation]="f.requiredMessageLocation ?? 'Top'"
+                [requiredMessageAlignment]="
+                  f.requiredMessageAlignment ?? 'Left'
+                "
                 (bannerUpload)="uploadBanner($event)"
                 (settingsChange)="store.update(id, $event)"
                 [fields]="f.fields"

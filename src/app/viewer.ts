@@ -24,9 +24,6 @@ import { Store, Field } from "./store";
               saved.</span
             >
             <div class="flex items-center gap-3">
-              <button class="text-button" (click)="closeWindow()">
-                Close window
-              </button>
               <button
                 class="preview-dismiss"
                 aria-label="Dismiss preview banner"
@@ -37,13 +34,11 @@ import { Store, Field } from "./store";
             </div>
           </div>
         }
-        @if (!preview()) {
-          <div class="view-close-row">
-            <button class="text-button" (click)="closeWindow()">
-              Close window
-            </button>
-          </div>
-        }
+        <div class="view-close-row">
+          <button class="text-button" (click)="closeWindow()">
+            Close window
+          </button>
+        </div>
         @if (closeHint()) {
           <p class="close-window-hint" role="status">
             Your browser kept this tab open. Close it using the browser's tab
@@ -107,7 +102,12 @@ import { Store, Field } from "./store";
             <h1>{{ f.name }}</h1>
             <p class="muted mb-6">{{ f.description }}</p>
             @if ((f.requiredMessageLocation ?? "Top") === "Top") {
-              <p class="required-field-message">
+              <p
+                class="required-field-message"
+                [style.text-align]="
+                  (f.requiredMessageAlignment ?? 'Left').toLowerCase()
+                "
+              >
                 {{
                   f.requiredMessage ?? "Required fields are marked with an *"
                 }}
@@ -350,7 +350,12 @@ import { Store, Field } from "./store";
           }
         </div>
         @if (!submitted() && f.requiredMessageLocation === "Bottom") {
-          <p class="required-field-message required-message-bottom">
+          <p
+            class="required-field-message required-message-bottom"
+            [style.text-align]="
+              (f.requiredMessageAlignment ?? 'Left').toLowerCase()
+            "
+          >
             {{ f.requiredMessage ?? "Required fields are marked with an *" }}
           </p>
         }
@@ -420,6 +425,7 @@ export class Viewer {
           bannerFilename: f.published.bannerFilename,
           bannerFit: f.published.bannerFit,
           requiredMessage: f.published.requiredMessage,
+          requiredMessageAlignment: f.published.requiredMessageAlignment,
           requiredMessageLocation: f.published.requiredMessageLocation,
         }
       : undefined;

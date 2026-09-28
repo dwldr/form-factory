@@ -61,6 +61,7 @@ export interface FormRecord {
   bannerFilename?: string;
   bannerFit?: boolean;
   requiredMessage?: string;
+  requiredMessageAlignment?: "Left" | "Center" | "Right";
   requiredMessageLocation?: "Top" | "Bottom" | "Hidden";
   published?: FormSnapshot | null;
   visibility?: "public" | "private";
@@ -182,6 +183,10 @@ function validPresentation(value: Record<string, unknown>): boolean {
       typeof value["bannerFit"] === "boolean") &&
     (value["requiredMessage"] === undefined ||
       typeof value["requiredMessage"] === "string") &&
+    (value["requiredMessageAlignment"] === undefined ||
+      ["Left", "Center", "Right"].includes(
+        String(value["requiredMessageAlignment"]),
+      )) &&
     (value["requiredMessageLocation"] === undefined ||
       ["Top", "Bottom", "Hidden"].includes(
         String(value["requiredMessageLocation"]),
