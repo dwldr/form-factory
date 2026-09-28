@@ -24,7 +24,11 @@ import { Store, Field } from "./store";
               saved.</span
             >
             <div class="flex items-center gap-3">
+              <button class="text-button" (click)="closeWindow()">
+                Close window
+              </button>
               <button
+                class="preview-dismiss"
                 aria-label="Dismiss preview banner"
                 (click)="previewDismissed.set(true)"
               >
@@ -32,6 +36,19 @@ import { Store, Field } from "./store";
               </button>
             </div>
           </div>
+        }
+        @if (!preview()) {
+          <div class="view-close-row">
+            <button class="text-button" (click)="closeWindow()">
+              Close window
+            </button>
+          </div>
+        }
+        @if (closeHint()) {
+          <p class="close-window-hint" role="status">
+            Your browser kept this tab open. Close it using the browser's tab
+            controls.
+          </p>
         }
         <div class="form-view-actions">
           <button
@@ -65,6 +82,7 @@ import { Store, Field } from "./store";
           @if (f.bannerImage) {
             <img
               class="form-banner-image"
+              [class.banner-fit]="f.bannerFit"
               [src]="f.bannerImage"
               alt="Form banner"
             />
@@ -88,6 +106,13 @@ import { Store, Field } from "./store";
           } @else {
             <h1>{{ f.name }}</h1>
             <p class="muted mb-6">{{ f.description }}</p>
+            @if ((f.requiredMessageLocation ?? "Top") === "Top") {
+              <p class="required-field-message">
+                {{
+                  f.requiredMessage ?? "Required fields are marked with an *"
+                }}
+              </p>
+            }
             @if (pages().length > 1) {
               <p class="helper">
                 Page {{ step() + 1 }} of {{ pages().length }}
@@ -324,6 +349,11 @@ import { Store, Field } from "./store";
             </form>
           }
         </div>
+        @if (!submitted() && f.requiredMessageLocation === "Bottom") {
+          <p class="required-field-message required-message-bottom">
+            {{ f.requiredMessage ?? "Required fields are marked with an *" }}
+          </p>
+        }
       } @else {
         <div class="response-paper empty">
           @if (denied()) {
@@ -351,6 +381,11 @@ import { Store, Field } from "./store";
   `,
 })
 export class Viewer {
+  closeHint = signal(false);
+  closeWindow() {
+    window.close();
+    this.closeHint.set(true);
+  }
   ui = inject(ChromeState);
   store = inject(Store);
   route = inject(ActivatedRoute);
@@ -378,7 +413,15 @@ export class Viewer {
     if (!f) return undefined;
     if (this.preview()) return this.store.canEdit(f) ? f : undefined;
     return f.published && this.store.canRead(f)
-      ? { ...f, ...f.published, bannerImage: f.published.bannerImage }
+      ? {
+          ...f,
+          ...f.published,
+          bannerImage: f.published.bannerImage,
+          bannerFilename: f.published.bannerFilename,
+          bannerFit: f.published.bannerFit,
+          requiredMessage: f.published.requiredMessage,
+          requiredMessageLocation: f.published.requiredMessageLocation,
+        }
       : undefined;
   });
   submitted = linkedSignal({ source: () => this.id, computation: () => false });

@@ -1,5 +1,7 @@
 import { Component, computed, input } from "@angular/core";
 const paths: Record<string, string> = {
+  upload: "M12 16V3 M6 9l6-6 6 6 M4 15v6h16v-6",
+  change: "M4 7h16 M16 3l4 4-4 4 M20 17H4 M8 13l-4 4 4 4",
   pencil: "m15 4 5 5 M4 20l5-1L21 7l-5-5L4 14z",
   copy: "M8 8h13v13H8z M16 8V3H3v13h5",
   trash: "M3 6h18 M9 6V3h6v3 M5 6l1 15h12l1-15 M10 10v7 M14 10v7",

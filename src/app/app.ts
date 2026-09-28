@@ -80,6 +80,13 @@ import { Store, readPreference } from "./store";
             ><span></span><span></span><span></span
           ></span>
         </button>
+        @if (menu()) {
+          <div
+            class="mobile-nav-backdrop"
+            aria-hidden="true"
+            (click)="closeMenu()"
+          ></div>
+        }
         <aside class="sidebar" id="sidebar">
           <a routerLink="/" class="brand" aria-label="Form Factory home">
             @if (collapsed() && !menu()) {

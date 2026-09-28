@@ -1,6 +1,10 @@
 import type { FormRecord, Field } from "./store";
 export interface FormSnapshot {
   bannerImage?: string;
+  bannerFilename?: string;
+  bannerFit?: boolean;
+  requiredMessage?: string;
+  requiredMessageLocation?: "Top" | "Bottom" | "Hidden";
   name: string;
   description: string;
   fields: Field[];
@@ -10,6 +14,14 @@ export interface FormSnapshot {
 export function snapshot(form: FormRecord): FormSnapshot {
   return structuredClone({
     ...(form.bannerImage ? { bannerImage: form.bannerImage } : {}),
+    ...(form.bannerFilename ? { bannerFilename: form.bannerFilename } : {}),
+    ...(form.bannerFit !== undefined ? { bannerFit: form.bannerFit } : {}),
+    ...(form.requiredMessage !== undefined
+      ? { requiredMessage: form.requiredMessage }
+      : {}),
+    ...(form.requiredMessageLocation !== undefined
+      ? { requiredMessageLocation: form.requiredMessageLocation }
+      : {}),
     name: form.name,
     description: form.description,
     fields: form.fields,
@@ -48,6 +60,10 @@ export function discardDraft(form: FormRecord): FormRecord | null {
         ...form,
         ...structuredClone(form.published),
         bannerImage: form.published.bannerImage,
+        bannerFilename: form.published.bannerFilename,
+        bannerFit: form.published.bannerFit,
+        requiredMessage: form.published.requiredMessage,
+        requiredMessageLocation: form.published.requiredMessageLocation,
         status: "Published",
       }
     : null;

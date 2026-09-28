@@ -25,7 +25,7 @@ Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwar
 
 ## Form rules and duplication
 
-The editor opens on the Form tab. The Field tab contains the field picker and individual question settings. Add field creates a movable placeholder; choosing a field replaces it at that position. Edit mode exposes question checkboxes and confirmed individual/bulk deletion. The Form tab accepts an optional PNG, JPEG, or WebP banner up to 1 MB, stored locally and included in the published snapshot.
+The editor opens on the Form tab. The Field tab contains the field picker and individual question settings. Add field creates a movable placeholder; choosing a field replaces it at that position. Edit mode exposes question checkboxes and confirmed individual/bulk deletion. The Form tab accepts an optional PNG, JPEG, or WebP banner up to 5 MB, optimized for local storage and included in the published snapshot. Banner replacement/deletion is available on focus or hover over the image, with an optional edge-to-edge fit. The uploaded filename remains visible in settings. A customizable required-field message can appear at the top, bottom, or be hidden. These presentation settings remain drafts until published.
 
 Each question can have one conditional-display rule and one conditional-required rule based on an earlier question. Rules support matching an answer, not matching an answer, or checking whether it is answered. Comparisons ignore capitalization; checkbox answers match individual selected options. Hidden questions are excluded from submissions and validation. A deleted or reordered source makes its rule inactive until an earlier source is chosen again. Rules are saved in drafts and only become live when published.
 

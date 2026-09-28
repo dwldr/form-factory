@@ -58,6 +58,10 @@ export interface Entry {
 }
 export interface FormRecord {
   bannerImage?: string;
+  bannerFilename?: string;
+  bannerFit?: boolean;
+  requiredMessage?: string;
+  requiredMessageLocation?: "Top" | "Bottom" | "Hidden";
   published?: FormSnapshot | null;
   visibility?: "public" | "private";
   allowedUsers?: string[];
@@ -166,14 +170,29 @@ function validBanner(value: unknown): boolean {
   return (
     value === undefined ||
     (typeof value === "string" &&
-      value.length <= 1400000 &&
+      value.length <= 7000000 &&
       /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value))
+  );
+}
+function validPresentation(value: Record<string, unknown>): boolean {
+  return (
+    (value["bannerFilename"] === undefined ||
+      typeof value["bannerFilename"] === "string") &&
+    (value["bannerFit"] === undefined ||
+      typeof value["bannerFit"] === "boolean") &&
+    (value["requiredMessage"] === undefined ||
+      typeof value["requiredMessage"] === "string") &&
+    (value["requiredMessageLocation"] === undefined ||
+      ["Top", "Bottom", "Hidden"].includes(
+        String(value["requiredMessageLocation"]),
+      ))
   );
 }
 function validSnapshot(value: unknown): boolean {
   return (
     record(value) &&
     validBanner(value["bannerImage"]) &&
+    validPresentation(value) &&
     typeof value["name"] === "string" &&
     typeof value["description"] === "string" &&
     Array.isArray(value["fields"]) &&
@@ -187,6 +206,7 @@ function validForm(value: unknown): value is FormRecord {
   if (!record(value)) return false;
   return (
     validBanner(value["bannerImage"]) &&
+    validPresentation(value) &&
     typeof value["id"] === "string" &&
     typeof value["name"] === "string" &&
     typeof value["description"] === "string" &&

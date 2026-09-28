@@ -1,3 +1,4 @@
+import { Tooltip } from "./tooltip";
 import { FormSettings } from "./form-settings";
 import { ChromeState, HeaderActions } from "./chrome";
 import { moveField } from "./form-version";
@@ -13,17 +14,19 @@ import { ActivatedRoute, RouterLink, Router } from "@angular/router";
 import { Store, Field, FieldType, newField } from "./store";
 import { Icon } from "./icon";
 @Component({
-  imports: [RouterLink, Icon, HeaderActions, FormSettings],
+  imports: [Tooltip, RouterLink, Icon, HeaderActions, FormSettings],
   template: `
     @if (form(); as f) {
       <h1 class="sr-only">Edit {{ f.name }}</h1>
       <div class="editor-toolbar">
         <span class="mobile-menu-space" aria-hidden="true"></span>
-        <nav aria-label="Breadcrumb">
-          <a routerLink="/forms">My Forms</a><span> / </span>{{ f.name }}
-        </nav>
-        <div class="flex gap-3 items-center">
+        <div class="editor-context-row">
+          <nav aria-label="Breadcrumb">
+            <a routerLink="/forms">My Forms</a><span> / </span>{{ f.name }}
+          </nav>
           <ff-header-actions />
+        </div>
+        <div class="flex gap-3 items-center editor-publish-actions">
           <span class="saved">{{
             store.persisted() ? "Saved" : "Not saved · storage unavailable"
           }}</span
@@ -51,6 +54,11 @@ import { Icon } from "./icon";
             <strong>Unpublished draft</strong> · changes are not live
           } @else {
             Published version is up to date
+          }
+          @if (f.published) {
+            <a [href]="store.publicUrl(f)" target="_blank" rel="noopener"
+              >View live form</a
+            >
           }</span
         ><label class="visibility-control"
           >Access<select
@@ -128,11 +136,38 @@ import { Icon } from "./icon";
           }
           <div class="form-paper">
             @if (f.bannerImage) {
-              <img
-                class="form-banner-image"
-                [src]="f.bannerImage"
-                alt="Form banner"
-              />
+              <div
+                class="editable-banner"
+                [class.banner-fit]="f.bannerFit"
+                tabindex="0"
+                aria-label="Form banner image controls"
+              >
+                <img
+                  class="form-banner-image"
+                  [src]="f.bannerImage"
+                  alt="Form banner"
+                />
+                <div class="banner-image-actions">
+                  <button class="secondary" (click)="bannerUpload.click()">
+                    <ff-icon name="upload" />Replace this image
+                  </button>
+                  <button class="danger delete-action" (click)="deleteBanner()">
+                    <ff-icon name="trash" />Delete this image
+                  </button>
+                </div>
+              </div>
+            }
+            <input
+              #bannerUpload
+              hidden
+              tabindex="-1"
+              aria-label="Replace banner image"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              (change)="uploadBanner($event)"
+            />
+            @if (imageError()) {
+              <p class="error" role="alert">{{ imageError() }}</p>
             }
             <label class="sr-only" for="form-title">Form title</label
             ><input
@@ -149,6 +184,13 @@ import { Icon } from "./icon";
               [value]="f.description"
               (input)="updateForm('description', $event)"
             ></textarea>
+            @if ((f.requiredMessageLocation ?? "Top") === "Top") {
+              <p class="required-field-message">
+                {{
+                  f.requiredMessage ?? "Required fields are marked with an *"
+                }}
+              </p>
+            }
             @for (field of displayFields(); track field.id; let i = $index) {
               <div
                 class="field-card"
@@ -308,6 +350,11 @@ import { Icon } from "./icon";
               ＋ Add field
             </button>
           </div>
+          @if (f.requiredMessageLocation === "Bottom") {
+            <p class="required-field-message required-message-bottom">
+              {{ f.requiredMessage ?? "Required fields are marked with an *" }}
+            </p>
+          }
         </section>
         <aside class="field-panel" aria-label="Field settings">
           <div class="settings-tabs" role="tablist" aria-label="Form tools">
@@ -342,7 +389,14 @@ import { Icon } from "./icon";
             >
               <ff-form-settings
                 [bannerImage]="f.bannerImage"
-                (bannerImageChange)="store.update(id, { bannerImage: $event })"
+                [bannerFilename]="f.bannerFilename"
+                [bannerFit]="f.bannerFit ?? false"
+                [requiredMessage]="
+                  f.requiredMessage ?? 'Required fields are marked with an *'
+                "
+                [requiredMessageLocation]="f.requiredMessageLocation ?? 'Top'"
+                (bannerUpload)="uploadBanner($event)"
+                (settingsChange)="store.update(id, $event)"
                 [fields]="f.fields"
                 (fieldsChange)="store.update(id, { fields: $event })"
               />
@@ -357,6 +411,14 @@ import { Icon } from "./icon";
                     }}</span
                     >{{ field.type }}
                   </h2>
+                  <button
+                    class="icon-button"
+                    aria-label="Change question type"
+                    ffTooltip="Change question type"
+                    (click)="changeType()"
+                  >
+                    <ff-icon name="change" />
+                  </button>
                 </div>
                 @if (field.type !== "Page break") {
                   <label
@@ -438,6 +500,14 @@ import { Icon } from "./icon";
                   >
                 }
                 <p class="helper">Changes save automatically.</p>
+                <button
+                  class="text-button delete-question-setting"
+                  aria-label="Delete this question"
+                  ffTooltip="Delete this question"
+                  (click)="deleteField(field.id)"
+                >
+                  <ff-icon name="trash" />
+                </button>
               } @else {
                 <h2 class="sr-only">Add field</h2>
                 <label class="sr-only" for="field-search"
@@ -649,7 +719,84 @@ export class Editor {
       .getElementById(next === "settings" ? "settings-tab" : "add-tab")
       ?.focus();
   }
+  imageError = signal("");
+  private uploadVersion = 0;
+  async uploadBanner(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = "";
+    if (!file) return;
+    const version = ++this.uploadVersion,
+      formId = this.id;
+    this.imageError.set("");
+    if (
+      !["image/png", "image/jpeg", "image/webp"].includes(file.type) ||
+      file.size > 5 * 1024 * 1024
+    ) {
+      this.imageError.set(
+        "Choose a PNG, JPEG, or WebP image no larger than 5 MB.",
+      );
+      return;
+    }
+    try {
+      const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const image = new Image();
+      image.src = data;
+      await image.decode();
+      // Optimize large images for the browser-local demo's storage.
+      const scale = Math.min(1, 1920 / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Image processing unavailable");
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const optimized = canvas.toDataURL("image/webp", 0.85);
+      if (version === this.uploadVersion && formId === this.id)
+        this.store.update(formId, {
+          bannerImage: optimized.length < data.length ? optimized : data,
+          bannerFilename: file.name,
+        });
+    } catch {
+      if (version === this.uploadVersion && formId === this.id)
+        this.imageError.set(
+          "This image could not be opened. Please choose another file.",
+        );
+    }
+  }
+  deleteBanner() {
+    if (!confirm("Delete this banner image?")) return;
+    this.uploadVersion++;
+    this.store.update(this.id, {
+      bannerImage: undefined,
+      bannerFilename: undefined,
+      bannerFit: false,
+    });
+    this.imageError.set("");
+  }
+  changeType() {
+    const field = this.active(),
+      form = this.form();
+    if (
+      !field ||
+      !form ||
+      !confirm(
+        "Change this question's type? Its settings and conditional rules will be cleared.",
+      )
+    )
+      return;
+    const index = form.fields.findIndex((f) => f.id === field.id);
+    this.removeFields([field.id]);
+    this.pendingIndex.set(index);
+    this.showPicker();
+  }
   showPicker() {
+    this.fieldQuery.set("");
     this.panelTab.set("add");
     this.selected.set(null);
     if (this.pendingIndex() === null)

@@ -1,5 +1,5 @@
-import { Component, input, output, signal } from "@angular/core";
-import { Field, FieldCondition } from "./store";
+import { Component, input, output } from "@angular/core";
+import { Field, FieldCondition, FormRecord } from "./store";
 import { Icon } from "./icon";
 
 @Component({
@@ -8,26 +8,39 @@ import { Icon } from "./icon";
   template: `
     <section class="banner-settings" aria-label="Form banner">
       <h3>Banner image</h3>
-      <p class="helper">Optional PNG, JPEG, or WebP image, up to 1 MB.</p>
-      @if (bannerImage()) {
-        <img
-          class="banner-thumbnail"
-          [src]="bannerImage()"
-          alt="Current form banner"
-        />
-        <button class="danger delete-action" (click)="deleteBanner()">
-          <ff-icon name="trash" />Delete image
-        </button>
-      }
+      <p class="helper">Optional PNG, JPEG, or WebP image, up to 5 MB.</p>
       <label
-        >Upload banner image<input
+        >{{ bannerImage() ? "Upload new banner image" : "Upload banner image"
+        }}<input
           type="file"
           accept="image/png,image/jpeg,image/webp"
-          (change)="uploadBanner($event)"
+          (change)="bannerUpload.emit($event)"
       /></label>
-      @if (imageError()) {
-        <p class="error" role="alert">{{ imageError() }}</p>
+      @if (bannerFilename()) {
+        <p class="helper banner-filename">{{ bannerFilename() }}</p>
       }
+      <label class="choice"
+        ><input
+          type="checkbox"
+          [checked]="bannerFit()"
+          (change)="settingsChange.emit({ bannerFit: checked($event) })"
+        />Fit image to form page</label
+      >
+      <label
+        >Required field message<input
+          [value]="requiredMessage()"
+          (input)="settingsChange.emit({ requiredMessage: value($event) })"
+      /></label>
+      <label
+        >Required message location<select
+          [value]="requiredMessageLocation()"
+          (change)="setMessageLocation($event)"
+        >
+          <option>Top</option>
+          <option>Bottom</option>
+          <option>Hidden</option>
+        </select></label
+      >
     </section>
     <p class="helper">
       Control when questions appear and when an answer is required. Changes save
@@ -134,49 +147,19 @@ import { Icon } from "./icon";
 })
 export class FormSettings {
   bannerImage = input<string>();
-  bannerImageChange = output<string | undefined>();
-  imageError = signal("");
-  private uploadVersion = 0;
-  async uploadBanner(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    input.value = "";
-    if (!file) return;
-    const version = ++this.uploadVersion;
-    this.imageError.set("");
-    if (
-      !["image/png", "image/jpeg", "image/webp"].includes(file.type) ||
-      file.size > 1024 * 1024
-    ) {
-      this.imageError.set(
-        "Choose a PNG, JPEG, or WebP image no larger than 1 MB.",
-      );
-      return;
-    }
-    try {
-      const data = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result));
-        reader.onerror = () => reject(reader.error);
-        reader.readAsDataURL(file);
-      });
-      const image = new Image();
-      image.src = data;
-      await image.decode();
-      if (version === this.uploadVersion) this.bannerImageChange.emit(data);
-    } catch {
-      if (version === this.uploadVersion)
-        this.imageError.set(
-          "This image could not be opened. Please choose another file.",
-        );
-    }
+  bannerFilename = input<string>();
+  bannerFit = input(false);
+  requiredMessage = input("Required fields are marked with an *");
+  requiredMessageLocation = input<"Top" | "Bottom" | "Hidden">("Top");
+  bannerUpload = output<Event>();
+  settingsChange = output<Partial<FormRecord>>();
+  checked(event: Event) {
+    return (event.target as HTMLInputElement).checked;
   }
-  deleteBanner() {
-    if (confirm("Delete the form banner image?")) {
-      this.uploadVersion++;
-      this.bannerImageChange.emit(undefined);
-      this.imageError.set("");
-    }
+  setMessageLocation(event: Event) {
+    this.settingsChange.emit({
+      requiredMessageLocation: this.value(event) as "Top" | "Bottom" | "Hidden",
+    });
   }
   fields = input.required<Field[]>();
   fieldsChange = output<Field[]>();

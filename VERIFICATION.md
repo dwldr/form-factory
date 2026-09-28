@@ -60,3 +60,13 @@ Sharing is browser-local; there is no real server or account system. Historical 
 - Sample forms cover conditional visibility/requirements, two-page registration, choices, ratings, draft-only forms, and private shared forms. No banner is included by default.
 - Two additional automated checks validate totals, answer labels, option values, earlier-field rule references, unique response IDs, relative timestamps, and independent reset objects. All 20 tests pass.
 - Updated Insights and My Responses descriptions to account for both sample answers and new submissions, while explaining older totals-only data.
+
+## Presentation and mobile updates — September 27, 2026
+
+- Enlarged preview dismissal and added close-window actions in preview and live forms, with guidance when the browser does not permit closing a tab.
+- Added question deletion to field settings, question-type replacement with a focused placeholder, and a visible Add field hover state.
+- Banner uploads accept up to 5 MB and are optimized for local storage. Filenames persist; image overlays provide replacement and confirmed deletion, and fit-to-page removes inset margins.
+- Required-field messages support editable text and Top/Bottom/Hidden placement, with draft/publication isolation and restoration covered by the automated suite (21 passing tests).
+- Browser-checked question replacement, banner upload/deletion, filename and upload-label changes, hidden/bottom messages, and preservation of the published banner/message after changing the draft.
+- At 390px, verified fitted image edges without horizontal overflow, separate breadcrumb/actions layout, enlarged preview close icon, and outside-tap closing of mobile navigation. Restored the normal viewport after checks.
+- Production build and formatting checks pass. Native iPhone file-picker behavior was not directly tested; the saved filename is displayed separately from the browser's file input.

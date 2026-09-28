@@ -60,3 +60,20 @@ test('banner changes stay in drafts and discard restores absence or the publishe
  assert.equal(discardDraft(published).bannerImage,'data:image/png;base64,AAAA');
  assert.equal(publishForm(published).published.bannerImage,undefined);
 });
+
+test('presentation settings publish together and discard restores older absent values', () => {
+ const form = publishForm(make());
+ Object.assign(form, {bannerFilename: 'banner.webp', bannerFit: true, requiredMessage: 'Please answer starred questions.', requiredMessageLocation: 'Bottom'});
+ assert.equal(hasDraft(form), true);
+ assert.equal(form.published.requiredMessage, undefined);
+ const discarded = discardDraft(form);
+ for (const key of ['bannerFilename', 'bannerFit', 'requiredMessage', 'requiredMessageLocation']) assert.equal(discarded[key], undefined);
+ const live = publishForm(form);
+ assert.equal(live.published.requiredMessageLocation, 'Bottom');
+ assert.equal(live.published.bannerFit, true);
+ live.requiredMessage = ''; live.requiredMessageLocation = 'Hidden';
+ assert.equal(discardDraft(live).requiredMessage, 'Please answer starred questions.');
+ const next = publishForm(live);
+ assert.equal(next.published.requiredMessage, '');
+ assert.equal(next.published.requiredMessageLocation, 'Hidden');
+});
