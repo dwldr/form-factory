@@ -286,6 +286,12 @@ export function seedForms(now = new Date()): FormRecord[] {
       ],
     },
   ];
+  const banners: Record<number, string> = {
+    0: "homa-appliances-pWUyHVJgLhg-unsplash.jpg",
+    1: "alex-simpson-9GwMIek9jnY-unsplash.jpg",
+    4: "michael-denning-LXomcUwf4vQ-unsplash.jpg",
+    7: "abel-y-costa-BhgeP48pDOE-unsplash.jpg",
+  };
   return definitions.map((definition, index) => {
     const id = `form-${index + 1}`;
     const fields = definition.fields.map((f) => ({
@@ -328,16 +334,10 @@ export function seedForms(now = new Date()): FormRecord[] {
     });
     return {
       id,
-      ...([0, 1, 7].includes(index)
+      ...(banners[index]
         ? {
-            bannerImage:
-              index === 0
-                ? "/abel-y-costa-BhgeP48pDOE-unsplash.jpg"
-                : "/michael-denning-LXomcUwf4vQ-unsplash.jpg",
-            bannerFilename:
-              index === 0
-                ? "abel-y-costa-BhgeP48pDOE-unsplash.jpg"
-                : "michael-denning-LXomcUwf4vQ-unsplash.jpg",
+            bannerImage: "/" + banners[index],
+            bannerFilename: banners[index],
             bannerFit: true,
           }
         : {}),

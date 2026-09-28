@@ -43,7 +43,8 @@ test('reset samples have independent objects and dates relative to initializatio
 test('some samples have bundled fitted banners and others remain image-free', () => {
  const forms = seedForms();
  const banners = forms.filter(form => form.bannerImage);
- assert.equal(banners.length, 3);
+ assert.equal(banners.length, 4);
+ assert.equal(new Set(banners.map(form => form.bannerImage)).size, 4);
  for (const form of banners) {
   assert.equal(form.bannerFit, true);
   assert.equal(form.bannerImage, '/' + form.bannerFilename);
