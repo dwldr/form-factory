@@ -7,6 +7,7 @@ import {
 } from "./notification-state";
 import {
   FormSnapshot,
+  snapshot,
   migrateForm,
   hasDraft,
   publishForm,
@@ -337,14 +338,46 @@ export class Store {
       forms.map((f) => (f.id === id && this.canEdit(f) ? publishForm(f) : f)),
     );
   }
-  discard(id: string) {
+  discard(id: string): (() => boolean) | undefined {
+    const original = this.forms().find((f) => f.id === id && this.canEdit(f));
+    if (!original) return;
+    const saved = structuredClone(original);
+    const discarded = discardDraft(original);
+    const index = this.forms().findIndex((f) => f.id === id);
     this.forms.update((forms) =>
-      forms.flatMap((f) => {
-        if (f.id !== id || !this.canEdit(f)) return [f];
-        const restored = discardDraft(f);
-        return restored ? [restored] : [];
-      }),
+      forms.flatMap((f) =>
+        f.id === id ? (discarded ? [discarded] : []) : [f],
+      ),
     );
+    let restored = false;
+    return () => {
+      if (restored || !this.canEdit(saved)) return false;
+      const current = this.forms().find((f) => f.id === id);
+      // Don't overwrite later edits or a newer publication; retain new responses.
+      if (
+        discarded
+          ? !current ||
+            JSON.stringify(snapshot(current)) !==
+              JSON.stringify(snapshot(discarded)) ||
+            JSON.stringify(current.published) !==
+              JSON.stringify(discarded.published)
+          : !!current
+      )
+        return false;
+      this.forms.update((forms) => {
+        if (current)
+          return forms.map((f) =>
+            f.id === id
+              ? { ...saved, entries: f.entries, responses: f.responses }
+              : f,
+          );
+        const next = [...forms];
+        next.splice(Math.min(index, next.length), 0, saved);
+        return next;
+      });
+      restored = true;
+      return true;
+    };
   }
 
   constructor() {

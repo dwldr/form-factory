@@ -1032,10 +1032,26 @@ export class Editor {
     ) {
       this.pendingIndex.set(null);
       this.checkedFields.set([]);
-      this.store.discard(f.id);
+      const undo = this.store.discard(f.id);
       this.selected.set(null);
       if (!f.published) void this.router.navigate(["/forms"]);
-      this.store.notify("Draft deleted.");
+      this.store.notify(
+        "Draft deleted.",
+        undo
+          ? {
+              label: "Undo",
+              run: () => {
+                if (undo()) {
+                  this.store.notify("Draft restored.");
+                  void this.router.navigate(["/forms", f.id, "edit"]);
+                } else
+                  this.store.notify(
+                    "This form has changed since deletion, so the draft could not be restored.",
+                  );
+              },
+            }
+          : null,
+      );
     }
   }
   publish() {
