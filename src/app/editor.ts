@@ -564,6 +564,15 @@ import { Icon } from "./icon";
                   }
                 </div>
                 <p class="helper">Choose a field to add it to your form.</p>
+                @if (pendingIndex() !== null) {
+                  <button
+                    class="text-button delete-question-setting"
+                    aria-label="Delete this question"
+                    (click)="deleteField(placeholderId)"
+                  >
+                    <ff-icon name="trash" />Delete this question
+                  </button>
+                }
               }
             </div>
           }
@@ -925,13 +934,7 @@ export class Editor {
     }
   }
   deleteField(id: string) {
-    if (
-      confirm(
-        id === this.placeholderId
-          ? "Delete this field placeholder?"
-          : "Remove this question?",
-      )
-    )
+    if (id === this.placeholderId || confirm("Remove this question?"))
       this.removeFields([id]);
   }
   move(i: number, delta: number) {
