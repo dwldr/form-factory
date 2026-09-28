@@ -328,6 +328,19 @@ export function seedForms(now = new Date()): FormRecord[] {
     });
     return {
       id,
+      ...([0, 1, 7].includes(index)
+        ? {
+            bannerImage:
+              index === 0
+                ? "/abel-y-costa-BhgeP48pDOE-unsplash.jpg"
+                : "/michael-denning-LXomcUwf4vQ-unsplash.jpg",
+            bannerFilename:
+              index === 0
+                ? "abel-y-costa-BhgeP48pDOE-unsplash.jpg"
+                : "michael-denning-LXomcUwf4vQ-unsplash.jpg",
+            bannerFit: true,
+          }
+        : {}),
       name: definition.name,
       description: definition.description,
       fields,

@@ -89,3 +89,15 @@ test('required message alignment stays in drafts until published and restores on
  assert.equal(discardDraft(live).requiredMessageAlignment, 'Center');
  assert.equal(publishForm(live).published.requiredMessageAlignment, 'Right');
 });
+
+test('required-message visibility is isolated between drafts and publications', () => {
+ const form = publishForm(make());
+ form.showRequiredMessage = false;
+ assert.equal(form.published.showRequiredMessage, undefined);
+ assert.equal(discardDraft(form).showRequiredMessage, undefined);
+ const live = publishForm(form);
+ assert.equal(live.published.showRequiredMessage, false);
+ live.showRequiredMessage = true;
+ assert.equal(discardDraft(live).showRequiredMessage, false);
+ assert.equal(publishForm(live).published.showRequiredMessage, true);
+});

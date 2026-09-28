@@ -670,8 +670,9 @@ th input {
   left: 50%;
   transform: translateX(-50%);
   max-width: calc(100% - 32px);
-  background: var(--ink);
-  color: var(--surface);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
   padding: 15px 20px;
   border-radius: 9px;
   box-shadow: 0 4px 24px #0003;
@@ -2643,4 +2644,33 @@ select {
   .preview-banner > .flex {
     margin-left: auto;
   }
+}
+
+.toast-undo {
+  text-decoration: underline;
+  font-weight: 600;
+}
+.editable-banner.banner-fit .form-banner-image,
+.response-paper > .form-banner-image.banner-fit {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.add-field {
+  margin-top: 12px;
+}
+.delete-question-setting {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Let the shell fill the remaining viewport without stale banner-height subtraction. */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+.app-shell,
+body:not(:has(.demo-banner)) .app-shell {
+  flex: 1;
+  min-height: 0;
 }

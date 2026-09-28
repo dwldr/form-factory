@@ -70,3 +70,13 @@ Sharing is browser-local; there is no real server or account system. Historical 
 - Browser-checked question replacement, banner upload/deletion, filename and upload-label changes, hidden/bottom messages, and preservation of the published banner/message after changing the draft.
 - At 390px, verified fitted image edges without horizontal overflow, separate breadcrumb/actions layout, enlarged preview close icon, and outside-tap closing of mobile navigation. Restored the normal viewport after checks.
 - Production build and formatting checks pass. Native iPhone file-picker behavior was not directly tested; the saved filename is displayed separately from the browser's file input.
+
+## September 28 updates
+
+- Toast colors now follow the active theme. Question-type changes skip confirmation and provide a six-second Undo action that restores the original question before or after choosing a replacement. Removed its hover tooltip to avoid a possible touch interaction issue.
+- Fit image to form defaults to checked, appears only with a banner, and fitted images have square lower corners. Three refreshed samples include bundled local banner images; existing saved data remains unchanged.
+- Show required message replaces the Hidden location option. Existing hidden settings remain hidden until enabled. Visibility is included in publication and draft restoration.
+- Added a visible Delete this question label, spacing above Add field, and linked Home's Total Responses to My Responses. The live-form link remains available beside unpublished-draft status when a publication exists.
+- The app shell fills remaining viewport space using flex layout, and banner measurement observes the banner itself instead of the body. Browser checks confirmed sidebar top/bottom alignment after dismissal; native Firefox confirmation remains outstanding.
+- Browser-verified Undo before/after replacement, theme colors, required-message controls, default fitted upload with square lower corners, and the live-form link for an edited publication. Removed the temporary test form. Native iPhone behavior was not directly verified.
+- All 24 automated tests, production build, and formatting checks pass.

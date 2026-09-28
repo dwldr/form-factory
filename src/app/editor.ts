@@ -1,4 +1,3 @@
-import { Tooltip } from "./tooltip";
 import { FormSettings } from "./form-settings";
 import { ChromeState, HeaderActions } from "./chrome";
 import { moveField } from "./form-version";
@@ -14,7 +13,7 @@ import { ActivatedRoute, RouterLink, Router } from "@angular/router";
 import { Store, Field, FieldType, newField } from "./store";
 import { Icon } from "./icon";
 @Component({
-  imports: [Tooltip, RouterLink, Icon, HeaderActions, FormSettings],
+  imports: [RouterLink, Icon, HeaderActions, FormSettings],
   template: `
     @if (form(); as f) {
       <h1 class="sr-only">Edit {{ f.name }}</h1>
@@ -141,7 +140,7 @@ import { Icon } from "./icon";
             @if (f.bannerImage) {
               <div
                 class="editable-banner"
-                [class.banner-fit]="f.bannerFit"
+                [class.banner-fit]="f.bannerFit ?? true"
                 tabindex="0"
                 aria-label="Form banner image controls"
               >
@@ -187,7 +186,11 @@ import { Icon } from "./icon";
               [value]="f.description"
               (input)="updateForm('description', $event)"
             ></textarea>
-            @if ((f.requiredMessageLocation ?? "Top") === "Top") {
+            @if (
+              (f.showRequiredMessage ??
+                f.requiredMessageLocation !== "Hidden") &&
+              (f.requiredMessageLocation ?? "Top") === "Top"
+            ) {
               <p
                 class="required-field-message"
                 [style.text-align]="
@@ -358,7 +361,10 @@ import { Icon } from "./icon";
               ＋ Add field
             </button>
           </div>
-          @if (f.requiredMessageLocation === "Bottom") {
+          @if (
+            (f.showRequiredMessage ?? true) &&
+            f.requiredMessageLocation === "Bottom"
+          ) {
             <p
               class="required-field-message required-message-bottom"
               [style.text-align]="
@@ -403,7 +409,11 @@ import { Icon } from "./icon";
               <ff-form-settings
                 [bannerImage]="f.bannerImage"
                 [bannerFilename]="f.bannerFilename"
-                [bannerFit]="f.bannerFit ?? false"
+                [bannerFit]="f.bannerFit ?? true"
+                [showRequiredMessage]="
+                  f.showRequiredMessage ??
+                  f.requiredMessageLocation !== 'Hidden'
+                "
                 [requiredMessage]="
                   f.requiredMessage ?? 'Required fields are marked with an *'
                 "
@@ -430,7 +440,7 @@ import { Icon } from "./icon";
                   <button
                     class="icon-button"
                     aria-label="Change question type"
-                    ffTooltip="Change question type"
+                    type="button"
                     (click)="changeType()"
                   >
                     <ff-icon name="change" />
@@ -519,10 +529,9 @@ import { Icon } from "./icon";
                 <button
                   class="text-button delete-question-setting"
                   aria-label="Delete this question"
-                  ffTooltip="Delete this question"
                   (click)="deleteField(field.id)"
                 >
-                  <ff-icon name="trash" />
+                  <ff-icon name="trash" />Delete this question
                 </button>
               } @else {
                 <h2 class="sr-only">Add field</h2>
@@ -791,25 +800,55 @@ export class Editor {
     this.store.update(this.id, {
       bannerImage: undefined,
       bannerFilename: undefined,
-      bannerFit: false,
+      bannerFit: true,
     });
     this.imageError.set("");
   }
+  private typeReplacement: {
+    formId: string;
+    field: Field;
+    index: number;
+    replacementId?: string;
+  } | null = null;
   changeType() {
     const field = this.active(),
       form = this.form();
-    if (
-      !field ||
-      !form ||
-      !confirm(
-        "Change this question's type? Its settings and conditional rules will be cleared.",
-      )
-    )
-      return;
+    if (!field || !form) return;
     const index = form.fields.findIndex((f) => f.id === field.id);
+    const undo = {
+      formId: this.id,
+      field: structuredClone(field),
+      index,
+      replacementId: undefined as string | undefined,
+    };
+    this.typeReplacement = undo;
     this.removeFields([field.id]);
     this.pendingIndex.set(index);
     this.showPicker();
+    this.store.notify("Question type changed. Field data was cleared.", {
+      label: "Undo",
+      run: () => {
+        const current = this.store.forms().find((f) => f.id === undo.formId);
+        if (!current || current.fields.some((f) => f.id === undo.field.id))
+          return;
+        const fields = [...current.fields];
+        const replacedIndex = fields.findIndex(
+          (f) => f.id === undo.replacementId,
+        );
+        const position =
+          replacedIndex >= 0
+            ? replacedIndex
+            : Math.min(undo.index, fields.length);
+        fields.splice(position, replacedIndex >= 0 ? 1 : 0, undo.field);
+        this.store.update(undo.formId, { fields });
+        if (this.id === undo.formId) {
+          this.pendingIndex.set(null);
+          this.selectField(undo.field.id);
+        }
+        this.typeReplacement = null;
+        this.store.notify("Question restored.");
+      },
+    });
   }
   showPicker() {
     this.fieldQuery.set("");
@@ -874,6 +913,12 @@ export class Editor {
         0,
         field,
       );
+      if (
+        this.typeReplacement?.formId === this.id &&
+        !this.typeReplacement.replacementId &&
+        this.pendingIndex() !== null
+      )
+        this.typeReplacement.replacementId = field.id;
       this.pendingIndex.set(null);
       this.store.update(this.id, { fields });
       this.selectField(field.id);

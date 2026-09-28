@@ -77,7 +77,7 @@ import { Store, Field } from "./store";
           @if (f.bannerImage) {
             <img
               class="form-banner-image"
-              [class.banner-fit]="f.bannerFit"
+              [class.banner-fit]="f.bannerFit ?? true"
               [src]="f.bannerImage"
               alt="Form banner"
             />
@@ -101,7 +101,11 @@ import { Store, Field } from "./store";
           } @else {
             <h1>{{ f.name }}</h1>
             <p class="muted mb-6">{{ f.description }}</p>
-            @if ((f.requiredMessageLocation ?? "Top") === "Top") {
+            @if (
+              (f.showRequiredMessage ??
+                f.requiredMessageLocation !== "Hidden") &&
+              (f.requiredMessageLocation ?? "Top") === "Top"
+            ) {
               <p
                 class="required-field-message"
                 [style.text-align]="
@@ -349,7 +353,11 @@ import { Store, Field } from "./store";
             </form>
           }
         </div>
-        @if (!submitted() && f.requiredMessageLocation === "Bottom") {
+        @if (
+          !submitted() &&
+          (f.showRequiredMessage ?? true) &&
+          f.requiredMessageLocation === "Bottom"
+        ) {
           <p
             class="required-field-message required-message-bottom"
             [style.text-align]="
@@ -425,6 +433,7 @@ export class Viewer {
           bannerFilename: f.published.bannerFilename,
           bannerFit: f.published.bannerFit,
           requiredMessage: f.published.requiredMessage,
+          showRequiredMessage: f.published.showRequiredMessage,
           requiredMessageAlignment: f.published.requiredMessageAlignment,
           requiredMessageLocation: f.published.requiredMessageLocation,
         }

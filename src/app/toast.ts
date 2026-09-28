@@ -12,6 +12,11 @@ import { Store } from "./store";
       (focusout)="resume($event)"
     >
       <span>{{ store.notice() }}</span>
+      @if (store.toastAction(); as action) {
+        <button class="text-button toast-undo" (click)="action.run()">
+          {{ action.label }}
+        </button>
+      }
       <button aria-label="Dismiss notification" (click)="store.notify('')">
         ✕
       </button>

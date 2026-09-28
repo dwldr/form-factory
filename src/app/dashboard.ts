@@ -288,7 +288,7 @@ export class Dashboard {
     },
     {
       label: "Total Responses",
-      path: "/insights",
+      path: "/responses",
       query: {},
       value: this.store.own().reduce((sum, f) => sum + f.responses, 0),
       icon: "users",

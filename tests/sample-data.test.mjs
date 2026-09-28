@@ -39,3 +39,14 @@ test('reset samples have independent objects and dates relative to initializatio
  assert.ok(!second[0].fields[0].options.includes('Mutation'));
  assert.equal(second[0].entries[0].date, '2026-09-27T11:00:00.000Z');
 });
+
+test('some samples have bundled fitted banners and others remain image-free', () => {
+ const forms = seedForms();
+ const banners = forms.filter(form => form.bannerImage);
+ assert.equal(banners.length, 3);
+ for (const form of banners) {
+  assert.equal(form.bannerFit, true);
+  assert.equal(form.bannerImage, '/' + form.bannerFilename);
+ }
+ assert.ok(forms.some(form => !form.bannerImage));
+});

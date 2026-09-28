@@ -1,7 +1,7 @@
 import { Toast } from "./toast";
 import { Tooltip } from "./tooltip";
 import { ChromeState, HeaderActions } from "./chrome";
-import { computed, afterNextRender } from "@angular/core";
+import { computed, afterEveryRender, DestroyRef } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NavigationEnd } from "@angular/router";
 import { AccessibilityAudit } from "./accessibility-audit";
@@ -281,15 +281,22 @@ export class App {
     { path: "/insights", label: "Insights", icon: "chart" },
   ];
   constructor() {
-    afterNextRender(() => {
-      const observer = new ResizeObserver(() => {
-        this.bannerHeight.set(
-          document.querySelector(".demo-banner")?.getBoundingClientRect()
-            .height ?? 0,
-        );
-      });
-      observer.observe(document.body);
+    let observedBanner: Element | null = null;
+    const measureBanner = () =>
+      this.bannerHeight.set(
+        observedBanner?.getBoundingClientRect().height ?? 0,
+      );
+    const observer = new ResizeObserver(measureBanner);
+    afterEveryRender(() => {
+      const banner = document.querySelector(".demo-banner");
+      if (banner !== observedBanner) {
+        observer.disconnect();
+        observedBanner = banner;
+        if (banner) observer.observe(banner);
+        measureBanner();
+      }
     });
+    inject(DestroyRef).onDestroy(() => observer.disconnect());
     this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event instanceof NavigationEnd) {
         this.routeUrl.set(event.urlAfterRedirects);

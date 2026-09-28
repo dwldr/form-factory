@@ -4,6 +4,7 @@ export interface FormSnapshot {
   bannerFilename?: string;
   bannerFit?: boolean;
   requiredMessage?: string;
+  showRequiredMessage?: boolean;
   requiredMessageAlignment?: "Left" | "Center" | "Right";
   requiredMessageLocation?: "Top" | "Bottom" | "Hidden";
   name: string;
@@ -25,6 +26,9 @@ export function snapshot(form: FormRecord): FormSnapshot {
       : {}),
     ...(form.requiredMessageLocation !== undefined
       ? { requiredMessageLocation: form.requiredMessageLocation }
+      : {}),
+    ...(form.showRequiredMessage !== undefined
+      ? { showRequiredMessage: form.showRequiredMessage }
       : {}),
     name: form.name,
     description: form.description,
@@ -67,6 +71,7 @@ export function discardDraft(form: FormRecord): FormRecord | null {
         bannerFilename: form.published.bannerFilename,
         bannerFit: form.published.bannerFit,
         requiredMessage: form.published.requiredMessage,
+        showRequiredMessage: form.published.showRequiredMessage,
         requiredMessageAlignment: form.published.requiredMessageAlignment,
         requiredMessageLocation: form.published.requiredMessageLocation,
         status: "Published",

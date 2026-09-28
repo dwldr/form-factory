@@ -19,38 +19,48 @@ import { Icon } from "./icon";
       @if (bannerFilename()) {
         <p class="helper banner-filename">{{ bannerFilename() }}</p>
       }
+      @if (bannerImage()) {
+        <label class="choice banner-fit-option"
+          ><input
+            type="checkbox"
+            [checked]="bannerFit()"
+            (change)="settingsChange.emit({ bannerFit: checked($event) })"
+          />Fit image to form</label
+        >
+      }
       <label class="choice banner-fit-option"
         ><input
           type="checkbox"
-          [checked]="bannerFit()"
-          (change)="settingsChange.emit({ bannerFit: checked($event) })"
-        />Fit image to form</label
+          [checked]="showRequiredMessage()"
+          (change)="toggleRequiredMessage($event)"
+        />Show required message</label
       >
-      <label
-        >Required field message<input
-          [value]="requiredMessage()"
-          (input)="settingsChange.emit({ requiredMessage: value($event) })"
-      /></label>
-      <label
-        >Required message location<select
-          [value]="requiredMessageLocation()"
-          (change)="setMessageLocation($event)"
+      @if (showRequiredMessage()) {
+        <label
+          >Required field message<input
+            [value]="requiredMessage()"
+            (input)="settingsChange.emit({ requiredMessage: value($event) })"
+        /></label>
+        <label
+          >Required message location<select
+            [value]="requiredMessageLocation()"
+            (change)="setMessageLocation($event)"
+          >
+            <option>Top</option>
+            <option>Bottom</option>
+          </select></label
         >
-          <option>Top</option>
-          <option>Bottom</option>
-          <option>Hidden</option>
-        </select></label
-      >
-      <label
-        >Required message alignment<select
-          [value]="requiredMessageAlignment()"
-          (change)="setMessageAlignment($event)"
+        <label
+          >Required message alignment<select
+            [value]="requiredMessageAlignment()"
+            (change)="setMessageAlignment($event)"
+          >
+            <option>Left</option>
+            <option>Center</option>
+            <option>Right</option>
+          </select></label
         >
-          <option>Left</option>
-          <option>Center</option>
-          <option>Right</option>
-        </select></label
-      >
+      }
     </section>
     <p class="helper">
       Control when questions appear and when an answer is required. Changes save
@@ -158,7 +168,16 @@ import { Icon } from "./icon";
 export class FormSettings {
   bannerImage = input<string>();
   bannerFilename = input<string>();
-  bannerFit = input(false);
+  bannerFit = input(true);
+  showRequiredMessage = input(true);
+  toggleRequiredMessage(event: Event) {
+    this.settingsChange.emit({
+      showRequiredMessage: this.checked(event),
+      ...(this.requiredMessageLocation() === "Hidden"
+        ? { requiredMessageLocation: "Top" as const }
+        : {}),
+    });
+  }
   requiredMessage = input("Required fields are marked with an *");
   requiredMessageAlignment = input<"Left" | "Center" | "Right">("Left");
   setMessageAlignment(event: Event) {

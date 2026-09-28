@@ -61,6 +61,7 @@ export interface FormRecord {
   bannerFilename?: string;
   bannerFit?: boolean;
   requiredMessage?: string;
+  showRequiredMessage?: boolean;
   requiredMessageAlignment?: "Left" | "Center" | "Right";
   requiredMessageLocation?: "Top" | "Bottom" | "Hidden";
   published?: FormSnapshot | null;
@@ -170,6 +171,10 @@ function validField(value: unknown): value is Field {
 function validBanner(value: unknown): boolean {
   return (
     value === undefined ||
+    [
+      "/abel-y-costa-BhgeP48pDOE-unsplash.jpg",
+      "/michael-denning-LXomcUwf4vQ-unsplash.jpg",
+    ].includes(String(value)) ||
     (typeof value === "string" &&
       value.length <= 7000000 &&
       /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(value))
@@ -179,6 +184,8 @@ function validPresentation(value: Record<string, unknown>): boolean {
   return (
     (value["bannerFilename"] === undefined ||
       typeof value["bannerFilename"] === "string") &&
+    (value["showRequiredMessage"] === undefined ||
+      typeof value["showRequiredMessage"] === "boolean") &&
     (value["bannerFit"] === undefined ||
       typeof value["bannerFit"] === "boolean") &&
     (value["requiredMessage"] === undefined ||
@@ -268,7 +275,14 @@ export class Store {
   readonly hasUnreadNotifications = computed(() =>
     this.notificationHistory().some((record) => !record.seen),
   );
-  notify(message: string) {
+  readonly toastAction = signal<{ label: string; run: () => void } | null>(
+    null,
+  );
+  notify(
+    message: string,
+    action: { label: string; run: () => void } | null = null,
+  ) {
+    this.toastAction.set(action);
     this.toast.set(message);
     this.noticeVersion.update((version) => version + 1);
     if (message.trim())
