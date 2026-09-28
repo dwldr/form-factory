@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from "@angular/core";
+import { Component, ElementRef, effect, inject, signal } from "@angular/core";
 import { Store } from "./store";
 
 @Component({
@@ -31,7 +31,7 @@ import { Store } from "./store";
 export class Toast {
   store = inject(Store);
   remaining = signal(6000);
-  private focused = false;
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
   private lastTick = 0;
   constructor() {
     effect((cleanup) => {
@@ -40,7 +40,6 @@ export class Toast {
       this.remaining.set(6000);
       this.lastTick = performance.now();
       if (!message) {
-        this.focused = false;
         return;
       }
       const timer = setInterval(() => this.tick(), 50);
@@ -49,7 +48,7 @@ export class Toast {
   }
   private tick() {
     const now = performance.now();
-    if (!this.focused)
+    if (!this.host.nativeElement.contains(document.activeElement))
       this.remaining.update((value) =>
         Math.max(0, value - (now - this.lastTick)),
       );
@@ -58,7 +57,6 @@ export class Toast {
   }
   pause() {
     this.tick();
-    this.focused = true;
   }
   resume(event: FocusEvent) {
     if (
@@ -68,6 +66,5 @@ export class Toast {
     )
       return;
     this.lastTick = performance.now();
-    this.focused = false;
   }
 }

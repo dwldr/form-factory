@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import ts from 'typescript';
+const source = await readFile(new URL('../src/app/toast.ts', import.meta.url), 'utf8');
+const ast = ts.createSourceFile('toast.ts', source, ts.ScriptTarget.Latest, true);
+const toast = ast.statements.find(node => ts.isClassDeclaration(node) && node.name.text === 'Toast');
+const tick = toast.members.find(node => node.name?.getText(ast) === 'tick').getText(ast);
+const {outputText} = ts.transpileModule(`export function create(performance, document) { return class { ${tick} }; }`, {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}});
+const {create} = await import('data:text/javascript;base64,' + Buffer.from(outputText).toString('base64'));
+test('toast resumes countdown when focused Undo is removed without a focusout event', () => {
+ let now = 0, remaining = 6000, dismissed = false;
+ const undo = {}, body = {}, doc = {activeElement:undo};
+ const Harness = create({now:()=>now}, doc);
+ const toast = new Harness();
+ toast.lastTick = 0;
+ toast.host = {nativeElement:{contains:element=>element===undo}};
+ toast.remaining = ()=>remaining;
+ toast.remaining.update = fn=>{remaining=fn(remaining)};
+ toast.store = {notify:message=>{dismissed=message===''}};
+ now = 1000; toast.tick(); assert.equal(remaining,6000);
+ doc.activeElement = body;
+ now = 1050; toast.tick(); assert.equal(remaining,5950);
+ now = 7000; toast.tick(); assert.equal(remaining,0); assert.equal(dismissed,true);
+});
+test('toast stays paused while its container or a surviving child retains focus', () => {
+ let remaining=6000;
+ const focused={}, doc={activeElement:focused};
+ const Harness=create({now:()=>12000},doc), toast=new Harness();
+ toast.lastTick=0; toast.host={nativeElement:{contains:element=>element===focused}};
+ toast.remaining=()=>remaining; toast.remaining.update=fn=>{remaining=fn(remaining)};
+ toast.store={notify:()=>assert.fail('Focused toast must remain visible')};
+ toast.tick(); assert.equal(remaining,6000);
+});
