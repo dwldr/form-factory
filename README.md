@@ -1,6 +1,6 @@
 # Form Factory
 
-A responsive Angular demo for creating forms and exploring responses. The design follows the reference screens in `notes/`, using the existing brand assets and locally hosted Inter font. `src/public/landing.html` is unchanged.
+A responsive Angular demo for creating forms and exploring responses.
 
 ## Run locally
 
