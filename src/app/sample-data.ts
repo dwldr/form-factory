@@ -288,7 +288,7 @@ export function seedForms(now = new Date()): FormRecord[] {
   ];
   const banners: Record<number, string> = {
     0: "homa-appliances-pWUyHVJgLhg-unsplash.jpg",
-    1: "alex-simpson-9GwMIek9jnY-unsplash.jpg",
+    1: "5208f60bfa402a80b9f1e2a15276c62c.jpg",
     4: "michael-denning-LXomcUwf4vQ-unsplash.jpg",
     7: "abel-y-costa-BhgeP48pDOE-unsplash.jpg",
   };

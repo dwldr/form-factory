@@ -175,7 +175,7 @@ function validBanner(value: unknown): boolean {
     [
       "/abel-y-costa-BhgeP48pDOE-unsplash.jpg",
       "/michael-denning-LXomcUwf4vQ-unsplash.jpg",
-      "/alex-simpson-9GwMIek9jnY-unsplash.jpg",
+      "/5208f60bfa402a80b9f1e2a15276c62c.jpg",
       "/homa-appliances-pWUyHVJgLhg-unsplash.jpg",
     ].includes(String(value)) ||
     (typeof value === "string" &&
