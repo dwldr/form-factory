@@ -93,8 +93,8 @@ import { Store, readPreference } from "./store";
               <img
                 [ngSrc]="
                   dark()
-                    ? '/brand-img-white-yellow.svg'
-                    : '/brand-img-black.svg'
+                    ? 'brand-img-white-yellow.svg'
+                    : 'brand-img-black.svg'
                 "
                 width="52"
                 height="47"
@@ -104,7 +104,7 @@ import { Store, readPreference } from "./store";
             } @else {
               <img
                 [ngSrc]="
-                  dark() ? '/brand-white-yellow.svg' : '/brand-black.svg'
+                  dark() ? 'brand-white-yellow.svg' : 'brand-black.svg'
                 "
                 width="142"
                 height="53"
