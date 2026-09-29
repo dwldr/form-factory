@@ -18,7 +18,6 @@ Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwar
 - Separate draft and published versions: previews show the draft; public/private links show only the published snapshot. Delete draft restores the last publication, or deletes a never-published form.
 - View and preview links open normal standalone browser tabs. Private forms enforce simulated account permissions, with a login/account-switch screen.
 - Collapsible, viewport-pinned sidebar with icon-only navigation, focus/hover tooltips, and a bottom-pinned account menu. Search is stored in the URL so Back restores its query and results.
-- All 18 field types from the mockup, including multi-page forms, sections, ratings, hidden values, and typed signatures.
 - Published form submissions, required-field and email/URL validation, response totals, per-question answer distributions, and CSV export.
 - Sample team, editable workspace settings, Derek Wilder admin profile, light/dark themes, and a dismissible/resettable demo banner.
 - Lazy-loaded routes, strict TypeScript/template checking, Angular signals, Signal Forms for workspace settings, and Tailwind utilities plus shared component styles.
