@@ -85,6 +85,19 @@
                 }
               ]
             },
+            "pwp": {
+              "baseHref": "/form-factory/",
+              "fileReplacements": [
+                {
+                  "replace": "src/app/accessibility-audit.ts",
+                  "with": "src/app/accessibility-audit.production.ts"
+                },
+                {
+                  "replace": "src/app/routing-features.ts",
+                  "with": "src/app/routing-features.pwp.ts"
+                }
+              ]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,

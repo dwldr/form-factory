@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "node scripts/dev-server.mjs",
     "build": "ng build",
-    "build:pwp": "ng build --base-href=/form-factory/",
+    "build:pwp": "ng build --configuration=production,pwp && node scripts/pwp-landing.mjs",
     "watch": "ng build --watch --configuration development",
     "format": "prettier --write \"src/app/*.ts\" src/styles.css src/main.ts",
     "format:check": "prettier --check \"src/app/*.ts\" src/styles.css src/main.ts",

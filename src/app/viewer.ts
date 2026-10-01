@@ -10,7 +10,7 @@ import {
   signal,
   linkedSignal,
 } from "@angular/core";
-import { ActivatedRoute, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Store, Field } from "./store";
 @Component({
   imports: [Tooltip, RouterLink, Icon],
@@ -406,7 +406,10 @@ export class Viewer {
   get id() {
     return this.params().get("id")!;
   }
-  currentPath = location.pathname;
+  private readonly router = inject(Router);
+  get currentPath() {
+    return this.router.url;
+  }
   routeData = toSignal(this.route.data, { requireSync: true });
   preview = computed(() => this.routeData()["preview"] === true);
   previewDismissed = signal(false);

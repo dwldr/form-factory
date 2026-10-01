@@ -15,7 +15,9 @@ import {
   canReadForm,
   duplicateForm,
 } from "./form-version";
-import { Service, computed, effect, signal } from "@angular/core";
+import { Service, computed, effect, signal, inject } from "@angular/core";
+import { DOCUMENT, Location } from "@angular/common";
+import { publicUrl } from "./public-url";
 export type FieldType =
   | "Text input"
   | "Paragraph"
@@ -269,6 +271,8 @@ function read(): FormRecord[] {
 }
 @Service()
 export class Store {
+  private readonly location = inject(Location);
+  private readonly document = inject(DOCUMENT);
   readonly forms = signal<FormRecord[]>(read());
   readonly query = signal("");
   private readonly toast = signal("");
@@ -318,7 +322,7 @@ export class Store {
   }
   publicUrl(f: FormRecord) {
     const path = this.publicPath(f);
-    return path ? location.origin + path : null;
+    return publicUrl(path, this.location, this.document.baseURI);
   }
   async copyUrl(f: FormRecord) {
     const url = this.publicUrl(f);

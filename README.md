@@ -11,6 +11,12 @@ npm start
 
 Open http://localhost:4200. Startup binds Angular to `127.0.0.1:4200` and forwards traffic from only the Ethernet address `192.168.1.20:4200`, including live-reload connections. It does not listen on wildcard or VPN addresses. If the Ethernet address changes, update `ethernetHost` in `scripts/dev-server.mjs`; startup fails rather than falling back to all interfaces. Press Ctrl+C to stop both listeners. A local firewall may need to allow Node on private networks. Each browser and origin has its own demo data; using the LAN address does not synchronize records across devices. Production output is generated in `dist/form-factory/browser` with `npm run build`.
 
+## Static hosting under /form-factory/
+
+Run `npm run build:pwp` and publish the contents of `dist/form-factory/browser` at `/form-factory/` on your server. This build uses hash routing: a form link looks like `/form-factory/#/f/form-id`. Opening links in a new tab and refreshing routes require no server rewrite rules. Copied form links include the deployment path, and the standalone landing page links use the same routing format.
+
+`npm start` and `npm run build` retain normal path routing, such as `/f/form-id`. The regular production build requires a server fallback to `index.html` for application routes. The PWP build does not convert previously copied path URLs; copy fresh links after deployment. Forms still use this browser's localStorage, so sharing a URL does not transfer custom form data to another browser.
+
 ## Included
 
 - Home dashboard, searchable My Forms with status filters and individual/bulk deletion, Shared with Me, and six reusable templates.
