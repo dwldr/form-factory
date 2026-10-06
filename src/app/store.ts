@@ -1,3 +1,5 @@
+import { BUTTON_COLORS } from "./form-presentation";
+import type { ButtonColor } from "./form-presentation";
 import { seedForms as seed } from "./sample-data";
 import { copyText } from "./clipboard";
 import {
@@ -60,6 +62,8 @@ export interface Entry {
   labels?: Record<string, string>;
 }
 export interface FormRecord {
+  thankYouMessage?: string;
+  buttonColor?: ButtonColor;
   bannerImage?: string;
   bannerFilename?: string;
   bannerFit?: boolean;
@@ -187,6 +191,10 @@ function validBanner(value: unknown): boolean {
 }
 function validPresentation(value: Record<string, unknown>): boolean {
   return (
+    (value["thankYouMessage"] === undefined ||
+      typeof value["thankYouMessage"] === "string") &&
+    (value["buttonColor"] === undefined ||
+      BUTTON_COLORS.some((color) => color.id === value["buttonColor"])) &&
     (value["bannerFilename"] === undefined ||
       typeof value["bannerFilename"] === "string") &&
     (value["showRequiredMessage"] === undefined ||

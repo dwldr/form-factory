@@ -1,5 +1,8 @@
+import type { ButtonColor } from "./form-presentation";
 import type { FormRecord, Field } from "./store";
 export interface FormSnapshot {
+  thankYouMessage?: string;
+  buttonColor?: ButtonColor;
   bannerImage?: string;
   bannerFilename?: string;
   bannerFit?: boolean;
@@ -15,6 +18,12 @@ export interface FormSnapshot {
 }
 export function snapshot(form: FormRecord): FormSnapshot {
   return structuredClone({
+    ...(form.thankYouMessage !== undefined
+      ? { thankYouMessage: form.thankYouMessage }
+      : {}),
+    ...(form.buttonColor !== undefined
+      ? { buttonColor: form.buttonColor }
+      : {}),
     ...(form.bannerImage ? { bannerImage: form.bannerImage } : {}),
     ...(form.bannerFilename ? { bannerFilename: form.bannerFilename } : {}),
     ...(form.bannerFit !== undefined ? { bannerFit: form.bannerFit } : {}),
@@ -67,6 +76,8 @@ export function discardDraft(form: FormRecord): FormRecord | null {
     ? {
         ...form,
         ...structuredClone(form.published),
+        thankYouMessage: form.published.thankYouMessage,
+        buttonColor: form.published.buttonColor,
         bannerImage: form.published.bannerImage,
         bannerFilename: form.published.bannerFilename,
         bannerFit: form.published.bannerFit,

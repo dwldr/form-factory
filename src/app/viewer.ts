@@ -1,3 +1,4 @@
+import { DEFAULT_THANK_YOU_MESSAGE, buttonColors } from "./form-presentation";
 import { Tooltip } from "./tooltip";
 import { ChromeState } from "./chrome";
 import { Icon } from "./icon";
@@ -73,7 +74,14 @@ import { Store, Field } from "./store";
             </button>
           }
         </div>
-        <div class="response-paper" id="form-content" tabindex="-1">
+        <div
+          class="response-paper"
+          id="form-content"
+          tabindex="-1"
+          [style.--form-button-bg]="palette(f.buttonColor).background"
+          [style.--form-button-text]="palette(f.buttonColor).text"
+          [style.--form-button-hover]="palette(f.buttonColor).hover"
+        >
           @if (f.bannerImage) {
             <img
               class="form-banner-image"
@@ -86,14 +94,14 @@ import { Store, Field } from "./store";
             <div class="empty">
               <span class="success-mark" aria-hidden="true">✓</span>
               <h1>Thank you!</h1>
-              <p>
-                @if (preview()) {
-                  Your preview is complete. No response was saved.
-                } @else {
-                  Your response has been recorded in this demo.<br />
-                  You may now close this browser tab or window.
-                }
+              <p class="form-success-message">
+                {{ f.thankYouMessage ?? defaultThankYouMessage }}
               </p>
+              @if (preview()) {
+                <p class="helper">
+                  Your preview is complete. No response was saved.
+                </p>
+              }
               <button class="primary" (click)="restart()">
                 Submit another response
               </button>
@@ -394,6 +402,8 @@ import { Store, Field } from "./store";
   `,
 })
 export class Viewer {
+  defaultThankYouMessage = DEFAULT_THANK_YOU_MESSAGE;
+  palette = buttonColors;
   closeHint = signal(false);
   closeWindow() {
     window.close();
@@ -432,6 +442,8 @@ export class Viewer {
       ? {
           ...f,
           ...f.published,
+          thankYouMessage: f.published.thankYouMessage,
+          buttonColor: f.published.buttonColor,
           bannerImage: f.published.bannerImage,
           bannerFilename: f.published.bannerFilename,
           bannerFit: f.published.bannerFit,

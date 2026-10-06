@@ -1,3 +1,9 @@
+import {
+  DEFAULT_THANK_YOU_MESSAGE,
+  BUTTON_COLORS,
+  buttonColors,
+  ButtonColor,
+} from "./form-presentation";
 import { Component, input, output } from "@angular/core";
 import { Field, FieldCondition, FormRecord } from "./store";
 import { Icon } from "./icon";
@@ -61,6 +67,40 @@ import { Icon } from "./icon";
           </select></label
         >
       }
+    </section>
+    <section class="rule-section" aria-label="Form appearance and confirmation">
+      <h3>Submission confirmation</h3>
+      <label
+        >Thank you message<textarea
+          rows="4"
+          [value]="thankYouMessage()"
+          (input)="settingsChange.emit({ thankYouMessage: value($event) })"
+        ></textarea>
+      </label>
+      <p class="helper">
+        Shown after a successful submission. Line breaks are preserved.
+      </p>
+      <h3>Button colors</h3>
+      <label
+        >Form button colors<select
+          [value]="buttonColor()"
+          (change)="setButtonColor($event)"
+        >
+          @for (color of colors; track color.id) {
+            <option [value]="color.id">{{ color.label }}</option>
+          }
+        </select></label
+      >
+      <span
+        class="form-button-sample"
+        [style.background]="palette(buttonColor()).background"
+        [style.color]="palette(buttonColor()).text"
+        >Button preview</span
+      >
+      <p class="helper">
+        High-contrast colors for Next, Back, Submit, and Submit another response
+        in both themes.
+      </p>
     </section>
     @for (section of sections; track section.key) {
       <section class="rule-section" [attr.aria-label]="section.title">
@@ -162,6 +202,15 @@ import { Icon } from "./icon";
   `,
 })
 export class FormSettings {
+  thankYouMessage = input(DEFAULT_THANK_YOU_MESSAGE);
+  buttonColor = input<ButtonColor>("yellow");
+  colors = BUTTON_COLORS;
+  palette = buttonColors;
+  setButtonColor(event: Event) {
+    this.settingsChange.emit({
+      buttonColor: buttonColors(this.value(event)).id,
+    });
+  }
   bannerImage = input<string>();
   bannerFilename = input<string>();
   bannerFit = input(true);

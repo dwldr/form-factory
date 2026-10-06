@@ -1,3 +1,4 @@
+import { DEFAULT_THANK_YOU_MESSAGE } from "./form-presentation";
 import { FormSettings } from "./form-settings";
 import { ChromeState, HeaderActions } from "./chrome";
 import { moveField } from "./form-version";
@@ -407,6 +408,8 @@ import { Icon } from "./icon";
               aria-labelledby="settings-tab"
             >
               <ff-form-settings
+                [thankYouMessage]="f.thankYouMessage ?? defaultThankYouMessage"
+                [buttonColor]="f.buttonColor ?? 'yellow'"
                 [bannerImage]="f.bannerImage"
                 [bannerFilename]="f.bannerFilename"
                 [bannerFit]="f.bannerFit ?? true"
@@ -589,6 +592,7 @@ import { Icon } from "./icon";
   `,
 })
 export class Editor {
+  defaultThankYouMessage = DEFAULT_THANK_YOU_MESSAGE;
   store = inject(Store);
   ui = inject(ChromeState);
   router = inject(Router);

@@ -92,9 +92,7 @@ import { Store, readPreference } from "./store";
             @if (collapsed() && !menu()) {
               <img
                 [ngSrc]="
-                  dark()
-                    ? 'brand-img-white-yellow.svg'
-                    : 'brand-img-black.svg'
+                  dark() ? 'brand-img-white-yellow.svg' : 'brand-img-black.svg'
                 "
                 width="52"
                 height="47"
@@ -103,9 +101,7 @@ import { Store, readPreference } from "./store";
               />
             } @else {
               <img
-                [ngSrc]="
-                  dark() ? 'brand-white-yellow.svg' : 'brand-black.svg'
-                "
+                [ngSrc]="dark() ? 'brand-white-yellow.svg' : 'brand-black.svg'"
                 width="142"
                 height="53"
                 alt="Form Factory"

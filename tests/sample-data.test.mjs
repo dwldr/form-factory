@@ -51,3 +51,13 @@ test('some samples have bundled fitted banners and others remain image-free', ()
  }
  assert.ok(forms.some(form => !form.bannerImage));
 });
+
+test('all sample forms have tailored success messages and demonstrate all six button palettes', () => {
+ const forms = seedForms();
+ assert.deepEqual([...new Set(forms.map(form => form.buttonColor))].sort(), ['blue', 'charcoal', 'green', 'purple', 'teal', 'yellow']);
+ assert.equal(new Set(forms.map(form => form.thankYouMessage)).size, forms.length);
+ for (const form of forms) {
+  assert.ok(form.thankYouMessage.includes('\n'));
+  assert.ok(form.thankYouMessage.trim().length > 30);
+ }
+});

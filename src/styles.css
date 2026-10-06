@@ -2719,3 +2719,32 @@ body:not(:has(.demo-banner)) .app-shell {
     padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   }
 }
+
+.form-success-message {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.response-paper button.primary,
+.response-paper button.secondary {
+  background: var(--form-button-bg, #ffdb00);
+  color: var(--form-button-text, #101820);
+  border-color: var(--form-button-bg, #ffdb00);
+}
+.response-paper button.primary:hover,
+.response-paper button.secondary:hover {
+  background: var(--form-button-hover, #f4d000);
+  border-color: var(--form-button-hover, #f4d000);
+}
+.response-paper button.primary:focus-visible,
+.response-paper button.secondary:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.form-button-sample {
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}

@@ -101,3 +101,19 @@ test('required-message visibility is isolated between drafts and publications', 
  assert.equal(discardDraft(live).showRequiredMessage, false);
  assert.equal(publishForm(live).published.showRequiredMessage, true);
 });
+
+test('thank-you message and button palette publish, duplicate, and discard without leaking drafts',()=>{
+ const original=publishForm(make());
+ original.thankYouMessage='Thanks for registering!\nSee you soon.'; original.buttonColor='blue';
+ assert.equal(original.published.thankYouMessage,undefined);
+ assert.equal(original.published.buttonColor,undefined);
+ assert.equal(discardDraft(original).thankYouMessage,undefined);
+ assert.equal(discardDraft(original).buttonColor,undefined);
+ const live=publishForm(original);
+ original.thankYouMessage='Changed again'; original.buttonColor='green';
+ assert.equal(live.published.buttonColor,'blue');
+ assert.equal(live.published.thankYouMessage,'Thanks for registering!\nSee you soon.');
+ live.buttonColor='purple'; assert.equal(discardDraft(live).buttonColor,'blue');
+ let n=0; const copy=duplicateForm(live,[live],()=>`copy-${++n}`);
+ assert.equal(copy.thankYouMessage,live.thankYouMessage); assert.equal(copy.buttonColor,'purple');
+});

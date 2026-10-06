@@ -20,6 +20,8 @@ export function seedForms(now = new Date()): FormRecord[] {
   const definitions: {
     name: string;
     description: string;
+    buttonColor: NonNullable<FormRecord["buttonColor"]>;
+    thankYouMessage: string;
     fields: Field[];
     rows?: string[][];
     draft?: boolean;
@@ -28,6 +30,9 @@ export function seedForms(now = new Date()): FormRecord[] {
   }[] = [
     {
       name: "Customer Feedback",
+      buttonColor: "teal",
+      thankYouMessage:
+        "Thanks for sharing your feedback!\nYour ideas help us make every experience better.",
       description:
         "Tell us about your experience. These sample answers are fictional.",
       fields: [
@@ -68,6 +73,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Event Registration",
+      buttonColor: "purple",
+      thankYouMessage:
+        "Your registration has been recorded.\nThank you for joining our community design meetup!",
       description:
         "Register for the community design meetup. Use Next to choose your session.",
       fields: [
@@ -102,6 +110,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Job Application",
+      buttonColor: "blue",
+      thankYouMessage:
+        "Thank you for your interest in joining our team.\nYour application has been recorded.",
       description:
         "Draft a simple application with a portfolio link and resume question.",
       draft: true,
@@ -114,6 +125,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Newsletter Signup",
+      buttonColor: "green",
+      thankYouMessage:
+        "Thanks for signing up!\nYour newsletter preferences have been recorded.",
       description:
         "Choose the updates you want to receive. No email is sent by this demo.",
       fields: [
@@ -131,6 +145,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Product Research Survey",
+      buttonColor: "charcoal",
+      thankYouMessage:
+        "Thanks for helping shape what comes next.\nYour research feedback has been recorded.",
       description: "Help prioritize the next set of improvements.",
       fields: [
         field(
@@ -157,6 +174,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Employee Onboarding",
+      buttonColor: "blue",
+      thankYouMessage:
+        "Welcome to the team!\nYour onboarding details have been recorded.",
       description: "Private draft for a new team member's first day.",
       draft: true,
       private: true,
@@ -172,6 +192,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Website Feedback",
+      buttonColor: "yellow",
+      thankYouMessage:
+        "Thanks for helping us improve our website.\nYour feedback has been recorded.",
       description: "Report a problem or suggest an improvement to a page.",
       fields: [
         field("page", "Website", "Page URL", [], true),
@@ -189,6 +212,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Workshop Registration",
+      buttonColor: "green",
+      thankYouMessage:
+        "Your workshop registration has been recorded.\nThanks for making time to learn with us!",
       description: "Choose a workshop and tell us your experience level.",
       fields: [
         ...identity(),
@@ -212,6 +238,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Contact Us",
+      buttonColor: "teal",
+      thankYouMessage:
+        "Thank you for getting in touch.\nYour message has been recorded.",
       description:
         "Send the demo team a question. Messages stay in this browser.",
       fields: contact(),
@@ -226,6 +255,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Volunteer Application",
+      buttonColor: "purple",
+      thankYouMessage:
+        "Thanks for offering your time and talents.\nYour volunteer application has been recorded.",
       description: "An unpublished draft for community volunteers.",
       draft: true,
       fields: [
@@ -240,6 +272,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Team Satisfaction",
+      buttonColor: "yellow",
+      thankYouMessage:
+        "Thanks for sharing your perspective.\nYour feedback helps build a more supportive team.",
       description: "A private shared form for the demo team.",
       shared: true,
       private: true,
@@ -254,6 +289,9 @@ export function seedForms(now = new Date()): FormRecord[] {
     },
     {
       name: "Design Review",
+      buttonColor: "charcoal",
+      thankYouMessage:
+        "Your design review has been recorded.\nThanks for helping make the details better.",
       description:
         "A private shared review with a conditional revision question.",
       shared: true,
@@ -343,6 +381,8 @@ export function seedForms(now = new Date()): FormRecord[] {
         : {}),
       name: definition.name,
       description: definition.description,
+      buttonColor: definition.buttonColor,
+      thankYouMessage: definition.thankYouMessage,
       fields,
       entries,
       responses: entries.length,
